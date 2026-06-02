@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Beyin Fakültesi">
+<link rel="manifest" href="manifest.json">
+<title>Beyin Fakültesi</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1e;--surface:#111827;--surface2:#1a2235;--border:#1e2d45;--accent:#f59e0b;--accent2:#3b82f6;--danger:#ef4444;--success:#10b981;--text:#f1f5f9;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+body{display:flex;flex-direction:column}
+#loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;gap:32px}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:3px;color:var(--accent);line-height:1.1;text-align:center}
+.login-sub{color:var(--muted);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;text-align:center}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:16px}
+.inp{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 14px;font-size:15px;font-family:'DM Sans',sans-serif;width:100%;outline:none;transition:.2s}
+.inp:focus{border-color:var(--accent2)}
+select.inp option{background:var(--surface2)}
+textarea.inp{resize:vertical;min-height:72px}
+.lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;display:block}
+.frow{display:flex;flex-direction:column;gap:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:.15s;width:100%}
+.btn-accent{background:var(--accent);color:#000}.btn-accent:active{background:#fbbf24}
+.btn-primary{background:var(--accent2);color:#fff}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-success{background:var(--success);color:#fff}
+.btn-sm{padding:7px 13px;font-size:13px;width:auto}
+#app{display:none;flex-direction:column;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--accent)}
+.badge-admin{background:var(--accent);color:#000;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;text-transform:uppercase}
+.page{display:none;flex:1;overflow-y:auto;padding:14px;gap:12px;flex-direction:column}
+.page.active{display:flex}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.card-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px}
+.vc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:.15s}
+.vc:active{border-color:var(--accent2)}
+.vc-plaka{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--accent)}
+.pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;text-transform:uppercase}
+.pill-active{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.pill-done{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+.pill-yaz{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+.meta{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.bottomnav{background:var(--surface);border-top:1px solid var(--border);display:flex;position:sticky;bottom:0;z-index:100}
+.bnav{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;gap:3px;cursor:pointer;color:var(--muted);font-size:9px;transition:.15s;border:none;background:none}
+.bnav.active{color:var(--accent)}
+.bnav-ic{font-size:20px;line-height:1}
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.photo-thumb{aspect-ratio:1;border-radius:8px;object-fit:cover;width:100%;cursor:pointer;border:1px solid var(--border)}
+.photo-add{aspect-ratio:1;border-radius:8px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;font-size:26px;transition:.15s}
+.photo-slot-empty{aspect-ratio:1;border-radius:8px;border:1px solid var(--border);background:var(--surface2);opacity:.2}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(min-width:500px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:26px}
+.ftab{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.ftab.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.profit-card{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.25);border-radius:var(--radius);padding:14px}
+.prow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.prow:last-child{border-bottom:none}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;overflow-y:auto;padding:12px}
+.modal-overlay.open{display:block}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:600px;margin:0 auto;overflow:hidden}
+.modal-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-hdr h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px}
+.close-btn{background:none;border:none;color:var(--muted);font-size:26px;cursor:pointer;line-height:1;padding:2px 6px}
+.modal-body{padding:16px;display:flex;flex-direction:column;gap:14px}
+.user-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.user-row:last-child{border-bottom:none}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:32px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 18px;font-size:14px;z-index:999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.success{border-color:var(--success);color:var(--success)}
+#toast.error{border-color:var(--danger);color:var(--danger)}
+#imgViewer{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:500;align-items:center;justify-content:center}
+#imgViewer.open{display:flex}
+#imgViewer img{max-width:95vw;max-height:90vh;border-radius:8px;object-fit:contain}
+#imgViewer .iv-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:26px;cursor:pointer;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center}
+/* Süper arama */
+#superAraModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;padding:16px;overflow-y:auto}
+#superAraModal.open{display:block}
+.sara-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:600px;margin:0 auto;overflow:hidden}
+.sara-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center}
+.sara-hdr input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 14px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none}
+.sara-hdr input:focus{border-color:var(--accent2)}
+.sara-body{padding:12px;display:flex;flex-direction:column;gap:8px;max-height:70vh;overflow-y:auto}
+.sara-chip-row{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px}
+.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s}
+.chip.on{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+/* Yıl seçici */
+.yil-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
+.yil-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;padding:8px 4px;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;transition:.15s}
+.yil-btn.sel{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+/* checkbox custom */
+.chk-label{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;cursor:pointer;font-size:13px;transition:.15s}
+.chk-label:has(input:checked){border-color:var(--accent);background:rgba(245,158,11,.08)}
+.chk-label input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div style="text-align:center">
+    <div class="login-logo">BEYİN FAKÜLTESİ</div>
+    <div class="login-sub">ECU & Araç Servis Takip</div>
+  </div>
+  <div class="login-box">
+    <div class="frow"><label class="lbl">Kullanıcı Adı</label><input class="inp" type="text" id="loginUser" placeholder="Adınız" autocomplete="username"></div>
+    <div class="frow"><label class="lbl">Şifre</label><input class="inp" type="password" id="loginPass" placeholder="••••••" autocomplete="current-password"></div>
+    <button class="btn btn-accent" onclick="doLogin()">Giriş Yap</button>
+    <div id="loginErr" style="font-size:13px;color:var(--danger);text-align:center;display:none"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-title">BEYİN FAKÜLTESİ</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="adminBadge" class="badge-admin" style="display:none">Admin</span>
+      <span id="topbarUser" style="color:var(--muted);font-size:13px"></span>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()" style="width:auto">Çıkış</button>
+    </div>
+  </div>
+
+  <!-- İŞLER -->
+  <div class="page active" id="pageAktif">
+    <div style="display:flex;gap:8px">
+      <div style="position:relative;flex:1">
+        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none">🔍</span>
+        <input class="inp" type="text" id="searchInput" placeholder="Plaka, müşteri, telefon..." oninput="renderAktif()" style="padding-left:38px">
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px">
+      <button class="ftab active" onclick="setFilter('active',this)">Devam Eden</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+        <label class="lbl">Başlangıç</label>
+        <input class="inp" type="date" id="filterStart" onchange="renderAktif()" style="padding:9px 10px;font-size:13px">
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+        <label class="lbl">Bitiş</label>
+        <input class="inp" type="date" id="filterEnd" onchange="renderAktif()" style="padding:9px 10px;font-size:13px">
+      </div>
+      <button onclick="clearFilters()" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:0 12px;font-size:12px;cursor:pointer;margin-top:18px">Temizle</button>
+    </div>
+    <div id="searchResultCount" style="font-size:12px;color:var(--muted)"></div>
+    <div id="aktifList"><div class="spinner"></div></div>
+  </div>
+
+  <!-- YENİ KAYIT -->
+  <div class="page" id="pageEkle">
+    <div class="card">
+      <div class="card-title">Yeni Araç Kaydı</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+
+        <div class="frow"><label class="lbl">Plaka *</label>
+          <input class="inp" type="text" id="fPlaka" placeholder="34 ABC 123" oninput="this.value=this.value.toUpperCase()"></div>
+
+        <div class="frow"><label class="lbl">Müşteri Adı *</label>
+          <input class="inp" type="text" id="fMusteri" placeholder="Ad Soyad"></div>
+
+        <div class="frow"><label class="lbl">Telefon *</label>
+          <input class="inp" type="tel" id="fTel" placeholder="05xx xxx xxxx"></div>
+
+        <div class="frow"><label class="lbl">Araç Marka <span style="color:var(--muted);font-weight:400;font-size:10px">(listeden seç veya yaz)</span></label>
+          <input class="inp" type="text" id="fMarka" list="markaList" placeholder="Volkswagen, BMW, Mercedes...">
+          <datalist id="markaList">
+            <option>Volkswagen</option><option>Audi</option><option>Skoda</option><option>SEAT</option>
+            <option>BMW</option><option>Mercedes-Benz</option><option>Opel</option><option>Ford</option>
+            <option>Renault</option><option>Peugeot</option><option>Citroen</option><option>Fiat</option>
+            <option>Alfa Romeo</option><option>Lancia</option><option>Toyota</option><option>Honda</option>
+            <option>Hyundai</option><option>Kia</option><option>Nissan</option><option>Mazda</option>
+            <option>Mitsubishi</option><option>Subaru</option><option>Suzuki</option><option>Isuzu</option>
+            <option>Volvo</option><option>Land Rover</option><option>Range Rover</option><option>Jaguar</option>
+            <option>Mini</option><option>Porsche</option><option>Jeep</option><option>Chevrolet</option>
+            <option>Dacia</option><option>Saab</option><option>Infiniti</option><option>Lexus</option>
+            <option>Chrysler</option><option>Dodge</option><option>Cadillac</option><option>GMC</option>
+            <option>DS</option><option>Smart</option><option>Tata</option><option>Mahindra</option>
+          </datalist></div>
+
+        <div class="frow"><label class="lbl">Araç Modeli</label>
+          <input class="inp" type="text" id="fModel" placeholder="Passat, Golf, C200, 320d..."></div>
+
+        <div class="frow">
+          <label class="lbl">Üretim Yılı</label>
+          <input class="inp" type="text" id="fYilManuel" placeholder="Örn: 2018" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        </div>
+
+        <div class="frow"><label class="lbl">Motor / Hacim</label>
+          <input class="inp" type="text" id="fMotor" placeholder="2.0 TDI, 1.6 CDI, 2.2 d..."></div>
+
+        <div class="frow"><label class="lbl">ECU / Beyin <span style="color:var(--muted);font-weight:400;font-size:10px">(listeden seç veya yaz)</span></label>
+          <input class="inp" type="text" id="fEcu" list="ecuList" placeholder="Bosch EDC17, Siemens SID807...">
+          <datalist id="ecuList">
+            <option>Bosch EDC15C2</option><option>Bosch EDC15C4</option><option>Bosch EDC15C6</option>
+            <option>Bosch EDC15P</option><option>Bosch EDC15VM+</option>
+            <option>Bosch EDC16C3</option><option>Bosch EDC16C31</option><option>Bosch EDC16C34</option>
+            <option>Bosch EDC16C35</option><option>Bosch EDC16C39</option><option>Bosch EDC16C41</option>
+            <option>Bosch EDC16U1</option><option>Bosch EDC16U31</option><option>Bosch EDC16U34</option>
+            <option>Bosch EDC17C10</option><option>Bosch EDC17C11</option><option>Bosch EDC17C19</option>
+            <option>Bosch EDC17C41</option><option>Bosch EDC17C42</option><option>Bosch EDC17C43</option>
+            <option>Bosch EDC17C45</option><option>Bosch EDC17C46</option><option>Bosch EDC17C50</option>
+            <option>Bosch EDC17C54</option><option>Bosch EDC17C55</option><option>Bosch EDC17C57</option>
+            <option>Bosch EDC17C64</option><option>Bosch EDC17C69</option><option>Bosch EDC17C74</option>
+            <option>Bosch EDC17U01</option><option>Bosch EDC17U05</option>
+            <option>Bosch MED17.1</option><option>Bosch MED17.1.1</option><option>Bosch MED17.1.6</option>
+            <option>Bosch MED17.3</option><option>Bosch MED17.3.4</option><option>Bosch MED17.5</option>
+            <option>Bosch MED17.5.2</option><option>Bosch MED17.5.5</option><option>Bosch MED17.5.21</option>
+            <option>Bosch MED17.7.2</option><option>Bosch MED17.9</option><option>Bosch MED17.9.8</option>
+            <option>Bosch ME17.8</option><option>Bosch ME17.8.8</option><option>Bosch ME17.9.11</option>
+            <option>Bosch MD1CS001</option><option>Bosch MD1CS003</option><option>Bosch MD1CS006</option>
+            <option>Bosch MG1CS001</option><option>Bosch MG1CS003</option>
+            <option>Bosch PSG16</option><option>Bosch PSG5</option>
+            <option>Bosch M7.4.4</option><option>Bosch M7.9.7</option><option>Bosch ME7.5</option>
+            <option>Siemens SID201</option><option>Siemens SID202</option><option>Siemens SID203</option>
+            <option>Siemens SID204</option><option>Siemens SID205</option><option>Siemens SID206</option>
+            <option>Siemens SID208</option><option>Siemens SID209</option>
+            <option>Siemens SID301</option><option>Siemens SID305</option>
+            <option>Siemens SID807</option><option>Siemens SID807EVO</option><option>Siemens SID901</option>
+            <option>Siemens PPD1.x</option><option>Siemens PCR2.1</option><option>VDO MS6.x</option>
+            <option>Delphi DCM1.2</option><option>Delphi DCM3.2</option><option>Delphi DCM3.4</option>
+            <option>Delphi DCM3.5</option><option>Delphi DCM3.7</option><option>Delphi DCM6.2</option>
+            <option>Delphi MT35</option><option>Delphi MT38</option><option>Delphi MT60</option>
+            <option>Delphi MT80</option><option>Delphi MT92</option><option>Delphi DDCR</option>
+            <option>Continental EMS3110</option><option>Continental EMS3120</option>
+            <option>Continental EMS3125</option><option>Continental EMS3132</option>
+            <option>Continental SID208</option><option>Continental SID310</option>
+            <option>Continental SIM2K-140</option><option>Continental SIM2K-241</option>
+            <option>Continental SIM2K-244</option><option>Continental SIM2K-260</option>
+            <option>Continental TC1767</option><option>Continental TC1797</option>
+            <option>Marelli MJD6F3</option><option>Marelli MJD8F3</option><option>Marelli MJD8DV</option>
+            <option>Marelli MM10</option><option>Marelli MJ8DF</option>
+            <option>Marelli IAW4AF</option><option>Marelli IAW4CF</option><option>Marelli IAW5AM</option>
+            <option>Marelli IAW6LP</option><option>Marelli IAW7GF</option>
+            <option>Denso 275xxx</option><option>Denso 276xxx</option>
+            <option>Denso SH7055</option><option>Denso SH7058</option><option>Denso SH7059</option>
+            <option>Denso MB279700</option><option>Denso 33920-xxx</option>
+            <option>Mitsubishi E6T</option><option>Mitsubishi E67</option>
+            <option>Melco SH7058</option><option>Melco SH7059</option>
+            <option>Sagem S2000-1</option><option>Sagem S2PM</option><option>Sagem S3000</option>
+            <option>Valeo J34P</option><option>Valeo VD56.1</option>
+            <option>Fenix 5</option><option>Fenix 5.1</option>
+            <option>Simtec 56</option><option>Simtec 75</option><option>Simtec 76</option>
+            <option>Trijec</option><option>Kefico</option><option>Keihin</option>
+          </datalist></div>
+
+        <div class="frow"><label class="lbl">ECU Part No / Yazı</label>
+          <input class="inp" type="text" id="fEcuNo" placeholder="03L906018, 5WP44xxx, 0281xxx..."></div>
+
+        <!-- YAZILIM BLOĞU -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
+          <label class="chk-label" style="background:transparent;border:none;padding:0;margin-bottom:0;font-size:15px;font-weight:500">
+            <input type="checkbox" id="fYazilimCheck" onchange="toggleYazilim()">
+            <span>Yazılım / Tuning İşlemi</span>
+          </label>
+          <div id="yazilimPanel" style="display:none;flex-direction:column;gap:10px;margin-top:12px">
+            <label class="lbl">İşlem Türü (birden fazla seçilebilir)</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <label class="chk-label"><input type="checkbox" name="yt" value="EGR Off"> EGR Off</label>
+              <label class="chk-label"><input type="checkbox" name="yt" value="DPF Off"> DPF Off</label>
+              <label class="chk-label"><input type="checkbox" name="yt" value="AdBlue Off"> AdBlue Off</label>
+              <label class="chk-label"><input type="checkbox" name="yt" value="Stage 1"> Stage 1</label>
+              <label class="chk-label"><input type="checkbox" name="yt" value="Cat Off"> Cat Off</label>
+              <label class="chk-label"><input type="checkbox" name="yt" value="DTC Off"> DTC Off</label>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="frow">
+                <label class="lbl">1 — Full Backup</label>
+                <input class="inp" type="file" id="fDosya1" style="padding:8px">
+                <div id="fDosya1Progress" style="display:none;font-size:12px;color:var(--accent2);margin-top:4px">⏳ Yükleniyor...</div>
+                <div id="fDosya1Ok" style="display:none;font-size:12px;color:var(--success);margin-top:4px">✅ Yüklendi</div>
+              </div>
+              <div class="frow">
+                <label class="lbl">2 — Flash</label>
+                <input class="inp" type="file" id="fDosya2" style="padding:8px">
+                <div id="fDosya2Progress" style="display:none;font-size:12px;color:var(--accent2);margin-top:4px">⏳ Yükleniyor...</div>
+                <div id="fDosya2Ok" style="display:none;font-size:12px;color:var(--success);margin-top:4px">✅ Yüklendi</div>
+              </div>
+              <div class="frow">
+                <label class="lbl">3 — MIC</label>
+                <input class="inp" type="file" id="fDosya3" style="padding:8px">
+                <div id="fDosya3Progress" style="display:none;font-size:12px;color:var(--accent2);margin-top:4px">⏳ Yükleniyor...</div>
+                <div id="fDosya3Ok" style="display:none;font-size:12px;color:var(--success);margin-top:4px">✅ Yüklendi</div>
+              </div>
+              <div class="frow">
+                <label class="lbl">4 — EPROM</label>
+                <input class="inp" type="file" id="fDosya4" style="padding:8px">
+                <div id="fDosya4Progress" style="display:none;font-size:12px;color:var(--accent2);margin-top:4px">⏳ Yükleniyor...</div>
+                <div id="fDosya4Ok" style="display:none;font-size:12px;color:var(--success);margin-top:4px">✅ Yüklendi</div>
+              </div>
+              <div class="frow">
+                <label class="lbl">5 — Modifiye (Tuning)</label>
+                <input class="inp" type="file" id="fDosya5" style="padding:8px">
+                <div id="fDosya5Progress" style="display:none;font-size:12px;color:var(--accent2);margin-top:4px">⏳ Yükleniyor...</div>
+                <div id="fDosya5Ok" style="display:none;font-size:12px;color:var(--success);margin-top:4px">✅ Yüklendi</div>
+              </div>
+            </div>
+            <div class="frow">
+              <label class="lbl">Yazılım Notu</label>
+              <textarea class="inp" id="fYazilimNot" placeholder="Özel ayarlar, notlar..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="frow"><label class="lbl">Arıza Açıklaması *</label>
+          <textarea class="inp" id="fAriza" placeholder="Müşterinin belirttiği arıza..." maxlength="600" oninput="document.getElementById('ac').textContent=this.value.length+'/600'"></textarea>
+          <div style="font-size:11px;color:var(--muted);text-align:right" id="ac">0/600</div></div>
+
+        <div class="frow"><label class="lbl">Yapılan İşlem</label>
+          <textarea class="inp" id="fIslem" placeholder="Yapılan işlem detayı..."></textarea></div>
+
+        <div class="frow">
+          <label class="lbl">Fotoğraflar (max 8)</label>
+          <div class="photo-grid" id="addPhotoGrid">
+            <div class="photo-add" onclick="document.getElementById('camInput').click()">+</div>
+          </div>
+          <input type="file" id="camInput" accept="image/*" capture="environment" multiple style="display:none" onchange="handlePhotoAdd(event)">
+        </div>
+
+        <button class="btn btn-accent" onclick="saveVehicle()" id="saveBtn">💾 Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARŞİV -->
+  <div class="page" id="pageArsiv">
+    <div class="card" style="padding:12px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="position:relative">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none">🔍</span>
+          <input class="inp" type="text" id="arsivSearch" placeholder="Arıza veya yapılan işlem ara..." oninput="renderArsiv()" style="padding-left:38px">
+        </div>
+        <select class="inp" id="arsivTip" onchange="renderArsiv()" style="padding:9px 10px;font-size:13px">
+          <option value="all">Tüm alanlarda ara</option>
+          <option value="ariza">Sadece arıza açıklamasında</option>
+          <option value="islem">Sadece yapılan işlemde</option>
+          <option value="yazilim">Yazılım işlemlerine göre</option>
+          <option value="ecu">ECU / Beyin türüne göre</option>
+          <option value="marka">Araç markasına göre</option>
+        </select>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+            <label class="lbl">Başlangıç</label>
+            <input class="inp" type="date" id="arsivStart" onchange="renderArsiv()" style="padding:8px 10px;font-size:13px">
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+            <label class="lbl">Bitiş</label>
+            <input class="inp" type="date" id="arsivEnd" onchange="renderArsiv()" style="padding:8px 10px;font-size:13px">
+          </div>
+          <button onclick="clearArsiv()" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:0 10px;font-size:12px;cursor:pointer;margin-top:18px">Sıfırla</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div id="arsivCount" style="font-size:12px;color:var(--muted)"></div>
+          <button onclick="exportArsiv()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:12px;cursor:pointer">📥 CSV İndir</button>
+        </div>
+      </div>
+    </div>
+    <div id="arsivList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <!-- İSTATİSTİK -->
+  <div class="page" id="pageStats">
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px">
+      <button class="ftab active" onclick="setStatPeriod('daily',this)">Bugün</button>
+      <button class="ftab" onclick="setStatPeriod('weekly',this)">Bu Hafta</button>
+      <button class="ftab" onclick="setStatPeriod('monthly',this)">Bu Ay</button>
+      <button class="ftab" onclick="setStatPeriod('all',this)">Tümü</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-label">Toplam Araç</div><div class="stat-val" style="color:var(--accent2)" id="sToplam">-</div></div>
+      <div class="stat-box"><div class="stat-label">Tamamlanan</div><div class="stat-val" style="color:var(--success)" id="sTamamlanan">-</div></div>
+      <div class="stat-box"><div class="stat-label">Devam Eden</div><div class="stat-val" style="color:var(--accent)" id="sDevam">-</div></div>
+      <div class="stat-box"><div class="stat-label">Net Kar</div><div class="stat-val" style="color:var(--success)" id="sKar">-</div></div>
+    </div>
+    <div class="profit-card">
+      <div class="card-title">💰 Finansal Özet</div>
+      <div class="prow"><span style="color:var(--muted);font-size:14px">Toplam Gelir (Ödeme)</span><span id="pGelir" style="font-size:17px;color:var(--accent2);font-weight:600">₺0</span></div>
+      <div class="prow"><span style="color:var(--muted);font-size:14px">Toplam Maliyet</span><span id="pMaliyet" style="font-size:17px;color:var(--danger);font-weight:600">₺0</span></div>
+      <div class="prow"><span style="font-weight:600;font-size:15px">Net Kar</span><span id="pKar" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--success)">₺0</span></div>
+    </div>
+    <div id="statsList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <!-- YÖNETİM -->
+  <div class="page" id="pageAdmin">
+    <div class="card">
+      <div class="card-title">Kullanıcı Yönetimi</div>
+      <div id="userList"><div class="spinner"></div></div>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:13px;font-weight:500">Yeni Kullanıcı Ekle</div>
+        <input class="inp" type="text" id="newUserName" placeholder="Kullanıcı adı">
+        <input class="inp" type="password" id="newUserPass" placeholder="Şifre">
+        <label class="chk-label"><input type="checkbox" id="newUserAdmin"> Admin yetkisi ver</label>
+        <button class="btn btn-primary" onclick="addUser()">Kullanıcı Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottomnav">
+    <button class="bnav active" onclick="showPage('pageAktif',this)" id="bnAktif"><span class="bnav-ic">🚗</span><span>Güncel İşler</span></button>
+    <button class="bnav" onclick="showPage('pageEkle',this)" id="bnEkle"><span class="bnav-ic">➕</span><span>Yeni Kayıt</span></button>
+    <button class="bnav" onclick="showPage('pageArsiv',this);renderArsiv()" id="bnArsiv" style="display:none"><span class="bnav-ic">🗂</span><span>Arşiv</span></button>
+    <button class="bnav" onclick="showPage('pageStats',this);loadStats()" id="bnStats" style="display:none"><span class="bnav-ic">📊</span><span>İstatistik</span></button>
+    <button class="bnav" onclick="showPage('pageAdmin',this);loadUsers()" id="bnAdmin" style="display:none"><span class="bnav-ic">⚙️</span><span>Yönetim</span></button>
+    <button class="bnav" onclick="openSuperAra()" id="bnAra" style="display:none"><span class="bnav-ic">🔎</span><span>Ara</span></button>
+  </nav>
+</div>
+
+<!-- DETAY MODALİ -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2 id="modalPlaka">-</h2>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- SÜPER ARAMA -->
+<div id="superAraModal">
+  <div class="sara-box">
+    <div class="sara-hdr">
+      <input type="text" id="saraInput" placeholder="Plaka, müşteri, arıza, ECU, marka..." oninput="renderSara()">
+      <button onclick="closeSuperAra()" style="background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer">×</button>
+    </div>
+    <div class="sara-chip-row" id="saraChips">
+      <button class="chip on" onclick="toggleChip(this,'plaka')">Plaka</button>
+      <button class="chip on" onclick="toggleChip(this,'musteri')">Müşteri</button>
+      <button class="chip on" onclick="toggleChip(this,'telefon')">Telefon</button>
+      <button class="chip on" onclick="toggleChip(this,'ariza')">Arıza</button>
+      <button class="chip on" onclick="toggleChip(this,'islem')">İşlem</button>
+      <button class="chip on" onclick="toggleChip(this,'marka')">Marka</button>
+      <button class="chip on" onclick="toggleChip(this,'ecu')">ECU</button>
+      <button class="chip on" onclick="toggleChip(this,'yazilim')">Yazılım İşlemi</button>
+    </div>
+    <div id="saraCount" style="font-size:12px;color:var(--muted);padding:0 12px 8px"></div>
+    <div class="sara-body" id="saraList"></div>
+  </div>
+</div>
+
+<!-- IMAGE VIEWER -->
+<div id="imgViewer"><button class="iv-close" onclick="document.getElementById('imgViewer').classList.remove('open')">×</button><img id="ivImg" src=""></div>
+<div id="toast"></div>
+
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {getFirestore,collection,addDoc,getDocs,doc,updateDoc,deleteDoc,onSnapshot,query,orderBy,serverTimestamp,setDoc} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDtTPqftPA7o5_pd3oe-0vJlLEeyJ4K4U8",
+  authDomain: "beyin-fakultesi.firebaseapp.com",
+  projectId: "beyin-fakultesi",
+  messagingSenderId: "297161144458",
+  appId: "1:297161144458:web:95deb9aad4895dd6185573"
+};
+
+const CLOUDINARY = {
+  cloudName: "dj0qpakzl",
+  apiKey: "612963831477829",
+  uploadPreset: "beyin_fakultesi"
+};
+
+let app=null,db=null,currentUser=null,isAdmin=false,vehicles=[],currentFilter='all',addPhotos=[],saraFields=new Set(['plaka','musteri','telefon','ariza','islem','marka','ecu','yazilim']);
+
+try{app=initializeApp(FIREBASE_CONFIG);db=getFirestore(app);}catch(e){console.error(e);}
+
+window.updateModels=function(){}
+
+// ── AUTH ──
+window.doLogin=async function(){
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const err=document.getElementById('loginErr');
+  if(!user||!pass){err.textContent='Kullanıcı adı ve şifre gerekli';err.style.display='block';return;}
+  if(!db){err.textContent='Bağlantı hatası, sayfayı yenileyin';err.style.display='block';return;}
+  try{
+    const snap=await getDocs(collection(db,'users'));
+    let found=null;
+    snap.forEach(d=>{if(d.data().name?.toLowerCase()===user.toLowerCase()&&d.data().password===pass)found={id:d.id,...d.data()};});
+    if(!found){
+      if(snap.docs.length===0&&user==='admin'){
+        await setDoc(doc(db,'users','admin'),{name:'admin',password:pass,isAdmin:true,createdAt:serverTimestamp()});
+        found={id:'admin',name:'admin',isAdmin:true};
+        toast('Admin hesabı oluşturuldu','success');
+      }else{err.textContent='Kullanıcı adı veya şifre hatalı';err.style.display='block';return;}
+    }
+    currentUser=found;isAdmin=found.isAdmin===true;startApp();
+  }catch(e){err.textContent='Hata: '+e.message;err.style.display='block';}
+}
+
+window.doLogout=function(){
+  currentUser=null;isAdmin=false;vehicles=[];
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+
+function startApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('topbarUser').textContent=currentUser.name;
+  document.getElementById('adminBadge').style.display=isAdmin?'inline':'none';
+  if(isAdmin){
+    document.getElementById('bnStats').style.display='flex';
+    document.getElementById('bnAdmin').style.display='flex';
+    document.getElementById('bnArsiv').style.display='flex';
+    document.getElementById('bnAra').style.display='flex';
+  }
+  listenVehicles();
+}
+
+function listenVehicles(){
+  if(!db)return;
+  const q=query(collection(db,'vehicles'),orderBy('createdAt','desc'));
+  onSnapshot(q,snap=>{
+    vehicles=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderAktif();
+    if(document.getElementById('pageStats').classList.contains('active'))loadStats();
+    if(document.getElementById('pageArsiv').classList.contains('active'))renderArsiv();
+  });
+}
+
+// ── RENDER ──
+window.renderAktif=function(){
+  const s=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  const sd=document.getElementById('filterStart')?.value;
+  const ed=document.getElementById('filterEnd')?.value;
+  const sDate=sd?new Date(sd):null;
+  const eDate=ed?new Date(ed+'T23:59:59'):null;
+  let list=vehicles.filter(v=>{
+    // Güncel işler sayfasında sadece devam edenler
+    if(v.status==='done') return false;
+    const ms=!s||v.plaka?.toLowerCase().includes(s)||v.musteri?.toLowerCase().includes(s)||v.telefon?.toLowerCase().includes(s)||v.ariza?.toLowerCase().includes(s)||v.marka?.toLowerCase().includes(s);
+    const d=v.createdAt?.seconds?new Date(v.createdAt.seconds*1000):new Date(v.createdAt||Date.now());
+    return ms&&(!sDate||d>=sDate)&&(!eDate||d<=eDate);
+  });
+  const ce=document.getElementById('searchResultCount');
+  if(ce)ce.textContent=list.length?list.length+' kayıt':'';
+  const el=document.getElementById('aktifList');
+  if(!list.length){el.innerHTML='<div style="text-align:center;padding:48px;color:var(--muted)">🚘<br>Devam eden iş yok</div>';return;}
+  el.innerHTML=list.map(v=>vcHTML(v)).join('');
+}
+
+function vcHTML(v){
+  const yazBadge=v.yazilimAktif&&v.yazilimIslemleri?.length?v.yazilimIslemleri.map(i=>`<span class="pill pill-yaz">${i}</span>`).join(''):'';
+  return `<div class="vc" onclick="openDetail('${v.id}')">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span class="vc-plaka">${v.plaka||'-'}</span>
+      <span class="pill ${v.status==='done'?'pill-done':'pill-active'}">${v.status==='done'?'Tamamlandı':'Devam Ediyor'}</span>
+    </div>
+    <div style="font-size:14px;margin-top:4px">👤 ${v.musteri||'-'} · 📞 ${v.telefon||'-'}</div>
+    ${v.marka||v.model?`<div style="font-size:13px;color:var(--muted)">${v.marka||''} ${v.model||''} ${v.yil||''}</div>`:''}
+    ${v.ariza?`<div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.ariza}</div>`:''}
+    <div class="meta">
+      <span>📅 ${fmtDate(v.createdAt)}</span>
+      ${v.photos?.length?`<span>📷 ${v.photos.length}</span>`:''}
+      ${v.ecu?`<span>⚙️ ${v.ecu.replace('Bosch ','').replace('Siemens ','').replace('Delphi ','')}</span>`:''}
+      ${isAdmin&&v.status==='done'&&v.fiyat?`<span style="color:var(--success)">₺${v.fiyat}</span>`:''}
+    </div>
+    ${yazBadge?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${yazBadge}</div>`:''}
+  </div>`;
+}
+
+window.setFilter=function(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('#pageAktif .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAktif();
+}
+
+window.clearFilters=function(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('filterStart').value='';
+  document.getElementById('filterEnd').value='';
+  renderAktif();
+}
+
+// ── DETAY ──
+window.openDetail=async function(id){
+  const v=vehicles.find(x=>x.id===id);if(!v)return;
+  document.getElementById('modalPlaka').textContent=v.plaka||'-';
+  const body=document.getElementById('modalBody');
+  const photos=v.photos||[];
+  let phHTML='';
+  for(let i=0;i<8;i++){
+    if(i<photos.length)phHTML+=`<img class="photo-thumb" src="${photos[i]}" onclick="viewImg('${photos[i]}')" loading="lazy">`;
+    else if(i===photos.length&&photos.length<8)phHTML+=`<div class="photo-add" onclick="document.getElementById('camInputEdit').click()">+</div>`;
+    else phHTML+=`<div class="photo-slot-empty"></div>`;
+  }
+  const yazBadge=v.yazilimAktif&&v.yazilimIslemleri?.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${v.yazilimIslemleri.map(i=>`<span class="pill pill-yaz">${i}</span>`).join('')}</div>`:'';
+  const adminFin=isAdmin?`
+    <div class="profit-card">
+      <div class="card-title">💰 Finansal Bilgiler</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="frow"><label class="lbl">Maliyet (₺)</label><input class="inp" type="number" id="dMaliyet" value="${v.maliyet||''}" placeholder="0" oninput="calcP()"></div>
+        <div class="frow"><label class="lbl">Alınan Ödeme (₺)</label><input class="inp" type="number" id="dFiyat" value="${v.fiyat||''}" placeholder="0" oninput="calcP()"></div>
+        <div class="prow"><span style="color:var(--muted)">Net Kar</span><span id="dKar" style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--success)">${v.fiyat&&v.maliyet?'₺'+((v.fiyat||0)-(v.maliyet||0)):(v.fiyat?'₺'+v.fiyat:'–')}</span></div>
+      </div>
+    </div>`:'';
+  const actionBtns=isAdmin?`
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-success btn-sm" style="flex:1" onclick="saveDetail('${id}','done')">✅ Tamamla</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveDetail('${id}','active')">💾 Güncelle</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteV('${id}')">🗑</button>
+    </div>`:`<button class="btn btn-ghost btn-sm" onclick="updateAriza('${id}')">Arızayı Güncelle</button>`;
+
+  const dosyaBtn=v.yazilimAktif?`<div style="display:flex;gap:8px;flex-wrap:wrap">
+    ${v.orijinalDosya?`<button class="btn btn-ghost btn-sm" onclick="dlFile('${id}','ori')">⬇ Orijinal: ${v.orijinalDosya.name||'dosya'}</button>`:'<span style="font-size:12px;color:var(--muted)">Orijinal yok</span>'}
+    ${v.modDosya?`<button class="btn btn-ghost btn-sm" onclick="dlFile('${id}','mod')">⬇ Modifiye: ${v.modDosya.name||'dosya'}</button>`:'<span style="font-size:12px;color:var(--muted)">Mod yok</span>'}
+  </div>`:'';
+
+  body.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px">
+      <div><span style="color:var(--muted);font-size:11px">MÜŞTERİ</span><br><b>${v.musteri||'-'}</b></div>
+      <div><span style="color:var(--muted);font-size:11px">TELEFON</span><br><b>${v.telefon||'-'}</b></div>
+      ${v.marka||v.model?`<div style="grid-column:1/-1"><span style="color:var(--muted);font-size:11px">ARAÇ</span><br><b>${v.marka||''} ${v.model||''} ${v.yil||''} ${v.motor||''}</b></div>`:''}
+      ${v.ecu?`<div style="grid-column:1/-1"><span style="color:var(--muted);font-size:11px">ECU</span><br><b>${v.ecu}${v.ecuNo?' — '+v.ecuNo:''}</b></div>`:''}
+    </div>
+    ${yazBadge}
+    ${v.yazilimAktif&&dosyaBtn?`<div class="card" style="background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.2);padding:12px"><div class="card-title">Yazılım Dosyaları</div>${dosyaBtn}${v.yazilimNot?`<div style="font-size:13px;color:var(--muted);margin-top:8px">${v.yazilimNot}</div>`:''}</div>`:''}
+
+    <div class="frow"><label class="lbl">Arıza</label><textarea class="inp" id="dAriza" ${isAdmin?'':'readonly'}>${v.ariza||''}</textarea></div>
+    <div class="frow"><label class="lbl">Yapılan İşlem</label><textarea class="inp" id="dIslem">${v.islem||''}</textarea></div>
+    <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Fotoğraflar (${photos.length}/8)</div>
+    <div class="photo-grid">${phHTML}</div>
+    <input type="file" id="camInputEdit" accept="image/*" capture="environment" multiple style="display:none" onchange="handlePhotoEdit(event,'${id}')"></div>
+    ${adminFin}
+    ${actionBtns}
+    <div style="font-size:11px;color:var(--muted)">Ekleyen: ${v.ekleyen||'-'} · ${fmtDate(v.createdAt)}${v.closedAt?` · Kapatıldı: ${fmtDate(v.closedAt)}`:''}</div>`;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+window.calcP=function(){
+  const f=parseFloat(document.getElementById('dFiyat')?.value)||0;
+  const m=parseFloat(document.getElementById('dMaliyet')?.value)||0;
+  const el=document.getElementById('dKar');
+  if(el){el.textContent='₺'+(f-m);el.style.color=(f-m)>=0?'var(--success)':'var(--danger)';}
+}
+
+window.closeModal=function(){document.getElementById('detailModal').classList.remove('open');}
+
+window.saveDetail=async function(id,status){
+  try{
+    const ariza=document.getElementById('dAriza')?.value||'';
+    const islem=document.getElementById('dIslem')?.value||'';
+    const fiyat=parseFloat(document.getElementById('dFiyat')?.value)||0;
+    const maliyet=parseFloat(document.getElementById('dMaliyet')?.value)||0;
+    const upd={ariza,islem,fiyat,maliyet,status};
+    if(status==='done')upd.closedAt=serverTimestamp();
+    await updateDoc(doc(db,'vehicles',id),upd);
+    const idx=vehicles.findIndex(v=>v.id===id);
+    if(idx>-1)vehicles[idx]={...vehicles[idx],...upd,fiyat,maliyet};
+    toast(status==='done'?'Dosya kapatıldı ✅':'Güncellendi ✅','success');
+  }catch(e){
+    toast('Hata: '+e.message,'error');
+  }finally{
+    closeModal();
+    renderAktif();
+    if(document.getElementById('pageStats').classList.contains('active'))loadStats();
+  }
+}
+
+window.updateAriza=async function(id){
+  const ariza=document.getElementById('dAriza')?.value||'';
+  const islem=document.getElementById('dIslem')?.value||'';
+  await updateDoc(doc(db,'vehicles',id),{ariza,islem});
+  toast('Güncellendi','success');closeModal();
+}
+
+window.deleteV=async function(id){
+  if(!confirm('Bu kaydı silmek istiyor musunuz?'))return;
+  await deleteDoc(doc(db,'vehicles',id));
+  toast('Kayıt silindi','success');closeModal();
+}
+
+
+
+// ── FOTOĞRAF ──
+window.handlePhotoAdd=function(e){
+  const files=Array.from(e.target.files);
+  const rem=8-addPhotos.length;
+  addPhotos=[...addPhotos,...files.slice(0,rem)];
+  renderAddGrid();e.target.value='';
+}
+
+function renderAddGrid(){
+  const g=document.getElementById('addPhotoGrid');
+  let h=addPhotos.map((f,i)=>`<img class="photo-thumb" src="${URL.createObjectURL(f)}" onclick="addPhotos.splice(${i},1);renderAddGrid()" title="Kaldır">`).join('');
+  if(addPhotos.length<8)h+=`<div class="photo-add" onclick="document.getElementById('camInput').click()">+</div>`;
+  g.innerHTML=h;
+}
+
+window.handlePhotoEdit=async function(e,id){
+  const files=Array.from(e.target.files);
+  const v=vehicles.find(x=>x.id===id);
+  const cur=v?.photos||[];
+  const rem=8-cur.length;
+  if(rem<=0){toast('Max 8 fotoğraf','error');return;}
+  toast('Fotoğraflar yükleniyor...','');
+  const urls=await compressPhotos(files.slice(0,rem));
+  if(urls.length===0){toast('Yükleme başarısız','error');return;}
+  await updateDoc(doc(db,'vehicles',id),{photos:[...cur,...urls]});
+  toast(urls.length+' fotoğraf eklendi ✅','success');openDetail(id);e.target.value='';
+}
+
+// ── CLOUDINARY UPLOAD ──
+async function uploadToCloudinary(file, folder='vehicles') {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY.uploadPreset);
+  formData.append('folder', 'beyin_fakultesi/' + folder);
+  
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/auto/upload`, {
+    method: 'POST',
+    body: formData
+  });
+  
+  if (!res.ok) throw new Error('Cloudinary yükleme hatası: ' + res.status);
+  const data = await res.json();
+  return {
+    url: data.secure_url,
+    publicId: data.public_id,
+    name: file.name,
+    size: data.bytes,
+    format: data.format
+  };
+}
+
+async function compressPhotos(files){
+  const out=[];
+  for(const f of files){
+    try{
+      const r=await uploadToCloudinary(f,'fotograflar');
+      out.push(r.url);
+    }catch(e){
+      console.error('Foto yükleme hatası:',e);
+      toast('Fotoğraf yüklenemedi: '+f.name,'error');
+    }
+  }
+  return out;
+}
+
+function compress(file,max,q){
+  return new Promise(res=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const c=document.createElement('canvas');
+        let w=img.width,h=img.height;
+        if(w>max||h>max){if(w>h){h=h*max/w;w=max;}else{w=w*max/h;h=max;}}
+        c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        res(c.toDataURL('image/jpeg',q));
+      };img.src=e.target.result;
+    };r.readAsDataURL(file);
+  });
+}
+
+
+
+// ── KAYDET ──
+window.toggleYazilim=function(){
+  const on=document.getElementById('fYazilimCheck').checked;
+  document.getElementById('yazilimPanel').style.display=on?'flex':'none';
+}
+
+window.saveVehicle=async function(){
+  const g=id=>document.getElementById(id);
+  const gv=id=>{const el=g(id);return el?el.value.trim():'';}
+  const plaka=gv('fPlaka');
+  const musteri=gv('fMusteri');
+  const telefon=gv('fTel');
+  const ariza=gv('fAriza');
+  if(!plaka||!musteri||!telefon||!ariza){toast('Zorunlu alanları doldurun (*)','error');return;}
+  const btn=g('saveBtn');
+  btn.textContent='Kaydediliyor...';btn.disabled=true;
+  try{
+    if(addPhotos.length>0) toast('Fotoğraflar yükleniyor...','');
+    const photos=await compressPhotos(addPhotos);
+    const yazAktif=g('fYazilimCheck')?.checked||false;
+    let yazData={};
+    if(yazAktif){
+      yazData.yazilimIslemleri=Array.from(document.querySelectorAll('input[name="yt"]:checked')).map(c=>c.value);
+      yazData.yazilimNot=gv('fYazilimNot');
+      // 5 dosyayı Cloudinary'ye yükle
+      const dosyaEtiketler=['fullbackup','flash','mic','eprom','modifiye'];
+      const dosyaAdlari=['Full Backup','Flash','MIC','EPROM','Modifiye'];
+      for(let i=1;i<=5;i++){
+        const f=document.getElementById('fDosya'+i)?.files[0];
+        if(f){
+          document.getElementById('fDosya'+i+'Progress').style.display='block';
+          document.getElementById('fDosya'+i+'Ok').style.display='none';
+          try{
+            const r=await uploadToCloudinary(f,'ecudosyalar');
+            yazData['dosya'+i+'Ad']=r.name;
+            yazData['dosya'+i+'Url']=r.url;
+            yazData['dosya'+i+'Tip']=dosyaAdlari[i-1];
+            document.getElementById('fDosya'+i+'Progress').style.display='none';
+            document.getElementById('fDosya'+i+'Ok').style.display='block';
+          }catch(e){
+            document.getElementById('fDosya'+i+'Progress').style.display='none';
+            toast(dosyaAdlari[i-1]+' yükleme hatası: '+e.message,'error');
+          }
+        }
+      }
+    }
+    const data={
+      plaka,musteri,telefon,ariza,
+      marka:gv('fMarka'),
+      model:gv('fModel'),
+      yil:gv('fYilManuel'),
+      motor:gv('fMotor'),
+      ecu:gv('fEcu'),
+      ecuNo:gv('fEcuNo'),
+      islem:gv('fIslem'),
+      yazilimAktif:yazAktif,...yazData,
+      photos,status:'active',
+      ekleyen:currentUser.name,
+      createdAt:serverTimestamp(),
+      fiyat:0,maliyet:0
+    };
+    await addDoc(collection(db,'vehicles'),data);
+    toast('Araç kaydedildi ✅','success');
+    ['fPlaka','fMusteri','fTel','fModel','fMotor','fEcuNo','fAriza','fIslem','fYazilimNot','fMarka','fEcu','fYilManuel'].forEach(i=>{const el=g(i);if(el)el.value='';});
+    for(let i=1;i<=5;i++){const el=document.getElementById('fDosya'+i);if(el)el.value='';const ok=document.getElementById('fDosya'+i+'Ok');if(ok)ok.style.display='none';};
+    document.getElementById('fYazilimCheck').checked=false;
+    document.getElementById('yazilimPanel').style.display='none';
+    document.querySelectorAll('input[name="yt"]').forEach(c=>c.checked=false);
+    document.getElementById('ac').textContent='0/600';
+    addPhotos=[];renderAddGrid();
+    // Kayıt ekranını kapat → işler listesine git
+    showPage('pageAktif',document.getElementById('bnAktif'));
+  }catch(e){toast('Hata: '+e.message,'error');}
+  btn.textContent='💾 Kaydet';btn.disabled=false;
+}
+
+// ── ARŞİV ──
+window.renderArsiv=function(){
+  const s=(document.getElementById('arsivSearch')?.value||'').toLowerCase().trim();
+  const tip=document.getElementById('arsivTip')?.value||'all';
+  const sd=document.getElementById('arsivStart')?.value;
+  const ed=document.getElementById('arsivEnd')?.value;
+  const sDate=sd?new Date(sd):null;
+  const eDate=ed?new Date(ed+'T23:59:59'):null;
+  let list=vehicles.filter(v=>{
+    const d=v.createdAt?.seconds?new Date(v.createdAt.seconds*1000):new Date(v.createdAt||Date.now());
+    if(sDate&&d<sDate)return false;
+    if(eDate&&d>eDate)return false;
+    if(!s)return true;
+    if(tip==='ariza')return v.ariza?.toLowerCase().includes(s);
+    if(tip==='islem')return v.islem?.toLowerCase().includes(s);
+    if(tip==='yazilim')return v.yazilimIslemleri?.some(i=>i.toLowerCase().includes(s));
+    if(tip==='ecu')return v.ecu?.toLowerCase().includes(s)||v.ecuNo?.toLowerCase().includes(s);
+    if(tip==='marka')return v.marka?.toLowerCase().includes(s)||v.model?.toLowerCase().includes(s);
+    return v.ariza?.toLowerCase().includes(s)||v.islem?.toLowerCase().includes(s)||
+      v.plaka?.toLowerCase().includes(s)||v.musteri?.toLowerCase().includes(s)||
+      v.marka?.toLowerCase().includes(s)||v.ecu?.toLowerCase().includes(s)||
+      v.yazilimIslemleri?.some(i=>i.toLowerCase().includes(s));
+  });
+  document.getElementById('arsivCount').textContent=list.length+' kayıt';
+  const el=document.getElementById('arsivList');
+  if(!list.length){el.innerHTML='<div style="text-align:center;padding:48px;color:var(--muted)">🗂<br>Kayıt bulunamadı</div>';return;}
+  el.innerHTML=list.map(v=>{
+    const yazB=v.yazilimAktif&&v.yazilimIslemleri?.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${v.yazilimIslemleri.map(i=>`<span class="pill pill-yaz">${i}</span>`).join('')}</div>`:'';
+    return `<div class="vc" onclick="openDetail('${v.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <span class="vc-plaka">${v.plaka||'-'}</span>
+        <span class="pill ${v.status==='done'?'pill-done':'pill-active'}">${v.status==='done'?'Tamamlandı':'Devam'}</span>
+      </div>
+      <div style="font-size:13px;color:var(--text)">${v.musteri||'-'} · ${v.marka||''} ${v.model||''} ${v.yil||''}</div>
+      ${v.ariza?`<div style="font-size:13px;color:var(--muted)"><b style="color:var(--accent2)">Arıza:</b> ${v.ariza}</div>`:''}
+      ${v.islem?`<div style="font-size:13px;color:var(--muted)"><b style="color:var(--success)">İşlem:</b> ${v.islem}</div>`:''}
+      ${v.ecu?`<div style="font-size:12px;color:var(--muted)">ECU: ${v.ecu}${v.ecuNo?' — '+v.ecuNo:''}</div>`:''}
+      ${v.yazilimAktif&&[1,2,3,4,5].some(i=>v['dosya'+i+'Url'])?`<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+        ${[1,2,3,4,5].map(i=>v['dosya'+i+'Url']?`<a href="${v['dosya'+i+'Url']}" download="${v['dosya'+i+'Ad']||''}" onclick="event.stopPropagation()" style="background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3);border-radius:6px;padding:3px 10px;font-size:11px;text-decoration:none">${['💾','⚡','🎙️','🔌','✏️'][i-1]} ${v['dosya'+i+'Tip']||['Backup','Flash','MIC','EPROM','Modifiye'][i-1]} ⬇</a>`:'').join('')}
+      </div>`:''} 
+      ${yazB}
+      <div class="meta"><span>📅 ${fmtDate(v.createdAt)}</span>${isAdmin&&v.fiyat?`<span style="color:var(--success)">₺${v.fiyat} · Kar: ₺${(v.fiyat||0)-(v.maliyet||0)}</span>`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+window.clearArsiv=function(){
+  document.getElementById('arsivSearch').value='';
+  document.getElementById('arsivStart').value='';
+  document.getElementById('arsivEnd').value='';
+  document.getElementById('arsivTip').value='all';
+  renderArsiv();
+}
+
+window.exportArsiv=function(){
+  const rows=[['Plaka','Musteri','Telefon','Marka','Model','Yil','Motor','ECU','ECU_No','Ariza','Yapilan_Islem','Yazilim_Islemleri','Durum','Fiyat','Maliyet','Kar','Tarih']];
+  vehicles.forEach(v=>{
+    const d=v.createdAt?.seconds?new Date(v.createdAt.seconds*1000):new Date(v.createdAt||Date.now());
+    rows.push([v.plaka||'',v.musteri||'',v.telefon||'',v.marka||'',v.model||'',v.yil||'',v.motor||'',v.ecu||'',v.ecuNo||'',(v.ariza||'').replace(/,/g,' '),(v.islem||'').replace(/,/g,' '),(v.yazilimIslemleri||[]).join('+'),v.status==='done'?'Tamamlandi':'Devam',v.fiyat||0,v.maliyet||0,(v.fiyat||0)-(v.maliyet||0),d.toLocaleDateString('tr-TR')]);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='beyin_arsiv_'+new Date().toLocaleDateString('tr-TR').replace(/\./g,'-')+'.csv';a.click();
+  toast('CSV indirildi','success');
+}
+
+// ── İSTATİSTİK ──
+let statPeriod='daily';
+window.setStatPeriod=function(p,btn){
+  statPeriod=p;
+  document.querySelectorAll('#pageStats .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');loadStats();
+}
+
+window.loadStats=function(){
+  const now=new Date();
+  const list=vehicles.filter(v=>{
+    const d=v.createdAt?.seconds?new Date(v.createdAt.seconds*1000):new Date(v.createdAt||Date.now());
+    if(statPeriod==='daily')return d.toDateString()===now.toDateString();
+    if(statPeriod==='weekly'){const ws=new Date(now);ws.setDate(now.getDate()-now.getDay());return d>=ws;}
+    if(statPeriod==='monthly')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+    return true;
+  });
+  const done=list.filter(v=>v.status==='done');
+  const gelir=done.reduce((s,v)=>s+(parseFloat(v.fiyat)||0),0);
+  const maliyet=done.reduce((s,v)=>s+(parseFloat(v.maliyet)||0),0);
+  const kar=gelir-maliyet;
+  document.getElementById('sToplam').textContent=list.length;
+  document.getElementById('sTamamlanan').textContent=done.length;
+  document.getElementById('sDevam').textContent=list.filter(v=>v.status==='active').length;
+  document.getElementById('sKar').textContent='₺'+kar.toLocaleString('tr-TR');
+  document.getElementById('pGelir').textContent='₺'+gelir.toLocaleString('tr-TR');
+  document.getElementById('pMaliyet').textContent='₺'+maliyet.toLocaleString('tr-TR');
+  const karEl=document.getElementById('pKar');
+  karEl.textContent='₺'+kar.toLocaleString('tr-TR');
+  karEl.style.color=kar>=0?'var(--success)':'var(--danger)';
+  document.getElementById('statsList').innerHTML=done.slice(0,30).map(v=>`
+    <div class="vc" onclick="openDetail('${v.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div class="vc-plaka" style="font-size:20px">${v.plaka}</div>
+          <div style="font-size:12px;color:var(--muted)">${v.musteri} · ${fmtDate(v.closedAt||v.createdAt)}</div></div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--muted)">Net Kar</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--success)">₺${((parseFloat(v.fiyat)||0)-(parseFloat(v.maliyet)||0)).toLocaleString('tr-TR')}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── KULLANICI YÖNETİMİ ──
+window.loadUsers=async function(){
+  const el=document.getElementById('userList');
+  const snap=await getDocs(collection(db,'users'));
+  const users=snap.docs.map(d=>({id:d.id,...d.data()}));
+  el.innerHTML=users.map(u=>`<div class="user-row">
+    <div><div style="font-weight:500">${u.name}</div><div style="font-size:12px;color:var(--muted)">${u.isAdmin?'Admin':'Personel'}</div></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" onclick="toggleAdmin('${u.id}',${!u.isAdmin})">${u.isAdmin?'Admin Kaldır':'Admin Yap'}</button>
+      ${u.id!=='admin'?`<button class="btn btn-danger btn-sm" onclick="removeUser('${u.id}')">Sil</button>`:''}
+    </div></div>`).join('')||'<div style="color:var(--muted);font-size:13px">Kullanıcı yok</div>';
+}
+
+window.toggleAdmin=async function(id,val){
+  await updateDoc(doc(db,'users',id),{isAdmin:val});
+  toast(val?'Admin yetkisi verildi':'Admin kaldırıldı','success');loadUsers();
+}
+
+window.removeUser=async function(id){
+  if(!confirm('Kullanıcı silinsin mi?'))return;
+  await deleteDoc(doc(db,'users',id));toast('Silindi','success');loadUsers();
+}
+
+window.addUser=async function(){
+  const name=document.getElementById('newUserName').value.trim();
+  const pass=document.getElementById('newUserPass').value;
+  const isAdm=document.getElementById('newUserAdmin').checked;
+  if(!name||!pass){toast('Ad ve şifre gerekli','error');return;}
+  await setDoc(doc(db,'users',name.toLowerCase()),{name,password:pass,isAdmin:isAdm,createdAt:serverTimestamp()});
+  toast('Kullanıcı eklendi','success');
+  document.getElementById('newUserName').value='';document.getElementById('newUserPass').value='';document.getElementById('newUserAdmin').checked=false;
+  loadUsers();
+}
+
+// ── SÜPER ARAMA ──
+window.openSuperAra=function(){
+  document.getElementById('superAraModal').classList.add('open');
+  document.getElementById('saraInput').focus();
+  renderSara();
+}
+window.closeSuperAra=function(){document.getElementById('superAraModal').classList.remove('open');}
+window.toggleChip=function(btn,field){
+  btn.classList.toggle('on');
+  if(btn.classList.contains('on'))saraFields.add(field);else saraFields.delete(field);
+  renderSara();
+}
+
+window.renderSara=function(){
+  const s=(document.getElementById('saraInput')?.value||'').toLowerCase().trim();
+  if(!s){document.getElementById('saraList').innerHTML='<div style="text-align:center;padding:32px;color:var(--muted)">Arama yapmak için yazın...</div>';document.getElementById('saraCount').textContent='';return;}
+  const list=vehicles.filter(v=>{
+    if(saraFields.has('plaka')&&v.plaka?.toLowerCase().includes(s))return true;
+    if(saraFields.has('musteri')&&v.musteri?.toLowerCase().includes(s))return true;
+    if(saraFields.has('telefon')&&v.telefon?.toLowerCase().includes(s))return true;
+    if(saraFields.has('ariza')&&v.ariza?.toLowerCase().includes(s))return true;
+    if(saraFields.has('islem')&&v.islem?.toLowerCase().includes(s))return true;
+    if(saraFields.has('marka')&&(v.marka?.toLowerCase().includes(s)||v.model?.toLowerCase().includes(s)))return true;
+    if(saraFields.has('ecu')&&(v.ecu?.toLowerCase().includes(s)||v.ecuNo?.toLowerCase().includes(s)))return true;
+    if(saraFields.has('yazilim')&&v.yazilimIslemleri?.some(i=>i.toLowerCase().includes(s)))return true;
+    return false;
+  });
+  document.getElementById('saraCount').textContent=list.length+' sonuç';
+  document.getElementById('saraList').innerHTML=list.length?list.map(v=>`
+    <div class="vc" onclick="closeSuperAra();openDetail('${v.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <span class="vc-plaka" style="font-size:20px">${v.plaka||'-'}</span>
+        <span class="pill ${v.status==='done'?'pill-done':'pill-active'}">${v.status==='done'?'Tamamlandı':'Devam'}</span>
+      </div>
+      <div style="font-size:13px">${v.musteri||'-'} · ${v.marka||''} ${v.model||''} ${v.yil||''}</div>
+      ${v.ariza?`<div style="font-size:12px;color:var(--muted)">${v.ariza.substring(0,80)}${v.ariza.length>80?'...':''}</div>`:''}
+      ${v.ecu?`<div style="font-size:12px;color:var(--muted)">ECU: ${v.ecu}</div>`:''}
+      <div class="meta"><span>📅 ${fmtDate(v.createdAt)}</span></div>
+    </div>`).join(''):'<div style="text-align:center;padding:32px;color:var(--muted)">Sonuç bulunamadı</div>';
+}
+
+// ── YARDIMCILAR ──
+window.showPage=function(pid,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bnav').forEach(b=>b.classList.remove('active'));
+  document.getElementById(pid).classList.add('active');
+  btn.classList.add('active');
+}
+
+window.viewImg=function(src){document.getElementById('ivImg').src=src;document.getElementById('imgViewer').classList.add('open');}
+
+window.toast=function(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='show '+(type||'');
+  setTimeout(()=>el.className='',2500);
+}
+
+function fmtDate(val){
+  if(!val)return'-';
+  const d=val?.seconds?new Date(val.seconds*1000):new Date(val);
+  return d.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+</script>
+</body>
+</html>
