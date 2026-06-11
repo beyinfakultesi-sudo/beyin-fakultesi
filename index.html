@@ -477,7 +477,11 @@ textarea.inp{resize:vertical;min-height:72px}
 
     <div class="profit-card">
       <div class="card-title">📊 Dönem Özeti</div>
-      <div class="prow"><span style="color:var(--muted)">Araç Gelirleri</span><span id="ggSAracGelir" style="color:var(--success);font-weight:600">₺0</span></div>
+      <div class="prow" onclick="toggleGGGelirDetay()" style="cursor:pointer">
+        <span style="color:var(--muted)">Araç Gelirleri <span id="ggGelirArrow" style="font-size:11px">▼</span></span>
+        <span id="ggSAracGelir" style="color:var(--success);font-weight:600">₺0</span>
+      </div>
+      <div id="ggGelirDetay" style="display:none;flex-direction:column;gap:6px;padding:8px 0"></div>
       <div class="prow"><span style="color:var(--muted)">Diğer Gelirler</span><span id="ggSDigerGelir" style="color:var(--accent2);font-weight:600">₺0</span></div>
       <div class="prow" onclick="toggleGGMaliyetDetay()" style="cursor:pointer">
         <span style="color:var(--muted)">Araç Maliyetleri <span id="ggMaliyetArrow" style="font-size:11px">▼</span></span>
@@ -1398,6 +1402,15 @@ window.saveGG = async function() {
   } catch(e) { toast('Hata: '+e.message,'error'); }
 }
 
+window.toggleGGGelirDetay=function(){
+  const d=document.getElementById('ggGelirDetay');
+  const a=document.getElementById('ggGelirArrow');
+  if(!d)return;
+  const open=d.style.display==='flex';
+  d.style.display=open?'none':'flex';
+  if(a)a.textContent=open?'▼':'▲';
+}
+
 window.toggleGGMaliyetDetay=function(){
   const d=document.getElementById('ggMaliyetDetay');
   const a=document.getElementById('ggMaliyetArrow');
@@ -1458,6 +1471,29 @@ window.loadGG = async function() {
   document.getElementById('ggNetKar').textContent=fmt(netKar);
   document.getElementById('ggNetKar').style.color=netKar>=0?'var(--success)':'var(--danger)';
   document.getElementById('ggSAracGelir').textContent=fmt(aracGelir);
+  // Araç gelir detayı
+  const ggGelirDetay=document.getElementById('ggGelirDetay');
+  if(ggGelirDetay){
+    const gelirli=aracDone.filter(v=>{const g=v.veresiye?(parseFloat(v.pesin)||0):(parseFloat(v.fiyat)||0);return g>0;}).sort((a,b)=>{const ga=a.veresiye?(parseFloat(a.pesin)||0):(parseFloat(a.fiyat)||0);const gb=b.veresiye?(parseFloat(b.pesin)||0):(parseFloat(b.fiyat)||0);return gb-ga;});
+    if(!gelirli.length){
+      ggGelirDetay.innerHTML='<div style="font-size:12px;color:var(--muted);padding:4px 0">Gelir kaydı yok</div>';
+    } else {
+      ggGelirDetay.innerHTML=gelirli.map(v=>{
+        const tahsil=v.veresiye?(parseFloat(v.pesin)||0):(parseFloat(v.fiyat)||0);
+        return `<div onclick="openDetail('${v.id}')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface2);border-radius:8px;cursor:pointer;border-left:3px solid var(--success)">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px">${v.plaka||'-'}</div>
+            <div style="font-size:11px;color:var(--muted)">${v.musteri||'-'} · ${v.marka||''} ${v.model||''}</div>
+            <div style="font-size:11px;color:var(--muted)">${fmtDate(v.closedAt||v.createdAt)}${v.veresiye?' · 📋 Veresiye (peşin)':''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:15px;color:var(--success);font-weight:600">₺${tahsil.toLocaleString('tr-TR')}</div>
+            ${v.veresiye?`<div style="font-size:11px;color:var(--accent)">Kalan: ₺${((parseFloat(v.fiyat)||0)-(parseFloat(v.pesin)||0)).toLocaleString('tr-TR')}</div>`:''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
   document.getElementById('ggSDigerGelir').textContent=fmt(digerGelir);
   document.getElementById('ggSAracMaliyet').textContent=fmt(aracMaliyet);
   // Araç maliyet detayı
