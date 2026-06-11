@@ -1,7 +1,10 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#0f172a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -49,10 +52,17 @@ textarea.inp{resize:vertical;min-height:72px}
 .pill-done{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
 .pill-yaz{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
 .meta{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.bottomnav{background:var(--surface);border-top:1px solid var(--border);display:flex;position:sticky;bottom:0;z-index:100}
-.bnav{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;gap:3px;cursor:pointer;color:var(--muted);font-size:9px;transition:.15s;border:none;background:none}
+.bottomnav{background:var(--surface);border-top:1px solid var(--border);position:sticky;bottom:0;z-index:100;display:flex}
+#extraMenu{position:fixed;left:0;right:0;bottom:58px;background:var(--surface);border-top:2px solid var(--accent);z-index:200;display:none;flex-direction:column;box-shadow:0 -8px 24px rgba(0,0,0,.4)}
+#extraMenu.open{display:flex}
+.bnav-extra-item{display:flex;align-items:center;gap:14px;padding:16px 22px;cursor:pointer;color:var(--text);font-size:15px;border-bottom:1px solid var(--border);background:var(--surface)}
+.bnav-extra-item:active{background:var(--surface2)}
+.bnav-extra-item .ei{font-size:22px;width:28px;text-align:center}
+#extraBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199;display:none}
+#extraBackdrop.open{display:block}
+.bnav{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px;gap:2px;cursor:pointer;color:var(--muted);font-size:9px;transition:.15s;border:none;background:none}
 .bnav.active{color:var(--accent)}
-.bnav-ic{font-size:20px;line-height:1}
+.bnav-ic{font-size:18px;line-height:1}
 .photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .photo-thumb{aspect-ratio:1;border-radius:8px;object-fit:cover;width:100%;cursor:pointer;border:1px solid var(--border)}
 .photo-add{aspect-ratio:1;border-radius:8px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;font-size:26px;transition:.15s}
@@ -371,11 +381,23 @@ textarea.inp{resize:vertical;min-height:72px}
 
   <!-- İSTATİSTİK -->
   <div class="page" id="pageStats">
-    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px">
-      <button class="ftab active" onclick="setStatPeriod('daily',this)">Bugün</button>
-      <button class="ftab" onclick="setStatPeriod('weekly',this)">Bu Hafta</button>
-      <button class="ftab" onclick="setStatPeriod('monthly',this)">Bu Ay</button>
-      <button class="ftab" onclick="setStatPeriod('all',this)">Tümü</button>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+      <button class="ftab active" onclick="setStatPeriod('daily',this)" style="padding:10px 4px;font-size:12px;text-align:center">Bugün</button>
+      <button class="ftab" onclick="setStatPeriod('weekly',this)" style="padding:10px 4px;font-size:12px;text-align:center">Haftalık</button>
+      <button class="ftab" onclick="setStatPeriod('monthly',this)" style="padding:10px 4px;font-size:12px;text-align:center">Aylık</button>
+      <button class="ftab" onclick="setStatPeriod('yearly',this)" style="padding:10px 4px;font-size:12px;text-align:center">Yıllık</button>
+      <button class="ftab" onclick="setStatPeriod('all',this)" style="padding:10px 4px;font-size:12px;text-align:center">Tümü</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+        <label class="lbl">Başlangıç</label>
+        <input class="inp" type="date" id="statFilterStart" onchange="setStatPeriod('custom',null)" style="padding:8px 10px;font-size:13px">
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+        <label class="lbl">Bitiş</label>
+        <input class="inp" type="date" id="statFilterEnd" onchange="setStatPeriod('custom',null)" style="padding:8px 10px;font-size:13px">
+      </div>
+      <button onclick="clearStatFilter()" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:8px 10px;font-size:12px;cursor:pointer;white-space:nowrap">Temizle</button>
     </div>
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-label">Toplam Araç</div><div class="stat-val" style="color:var(--accent2)" id="sToplam">-</div></div>
@@ -385,11 +407,96 @@ textarea.inp{resize:vertical;min-height:72px}
     </div>
     <div class="profit-card">
       <div class="card-title">💰 Finansal Özet</div>
-      <div class="prow"><span style="color:var(--muted);font-size:14px">Toplam Gelir (Ödeme)</span><span id="pGelir" style="font-size:17px;color:var(--accent2);font-weight:600">₺0</span></div>
-      <div class="prow"><span style="color:var(--muted);font-size:14px">Toplam Maliyet</span><span id="pMaliyet" style="font-size:17px;color:var(--danger);font-weight:600">₺0</span></div>
+      <div class="prow"><span style="color:var(--muted);font-size:14px">Tahsil Edilen Gelir</span><span id="pGelir" style="font-size:17px;color:var(--accent2);font-weight:600">₺0</span></div>
+      <div class="prow" onclick="toggleMaliyetDetay()" style="cursor:pointer">
+        <span style="color:var(--muted);font-size:14px">Toplam Maliyet <span id="maliyetArrow" style="font-size:11px">▼</span></span>
+        <span id="pMaliyet" style="font-size:17px;color:var(--danger);font-weight:600">₺0</span>
+      </div>
+      <div id="maliyetDetay" style="display:none;flex-direction:column;gap:6px;padding:8px 0"></div>
       <div class="prow"><span style="font-weight:600;font-size:15px">Net Kar</span><span id="pKar" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--success)">₺0</span></div>
+    <div class="prow"><span style="color:var(--muted);font-size:14px">📋 Veresiye Alacak</span><span id="pVeresiye" style="font-size:17px;color:var(--accent);font-weight:600">₺0</span></div>
+    <div class="prow"><span style="color:var(--muted);font-size:14px">Veresiye Araç Sayısı</span><span id="pVeresiyeAdet" style="font-size:17px;color:var(--accent);font-weight:600">0</span></div>
     </div>
     <div id="statsList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <!-- GELİR GİDER -->
+  <div class="page" id="pageGelirGider">
+    <div class="card" style="padding:12px">
+      <div class="card-title">➕ Yeni Kayıt Ekle</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <label class="chk-label" style="justify-content:center" id="lblGelirTip">
+            <input type="radio" name="ggTip" value="gelir" checked onchange="toggleGGTip(this)"> 💰 Gelir
+          </label>
+          <label class="chk-label" style="justify-content:center" id="lblGiderTip">
+            <input type="radio" name="ggTip" value="gider" onchange="toggleGGTip(this)"> 📤 Gider
+          </label>
+        </div>
+        <div class="frow">
+          <label class="lbl">Kategori</label>
+          <select class="inp" id="ggKategori">
+            <option value="">-- Seçin --</option>
+          </select>
+        </div>
+        <div class="frow"><label class="lbl">Açıklama</label>
+          <input class="inp" type="text" id="ggAciklama" placeholder="Örn: Elektrik faturası, Takım alımı..."></div>
+        <div class="frow"><label class="lbl">Tutar (₺)</label>
+          <input class="inp" type="number" id="ggTutar" placeholder="0" min="0"></div>
+        <div class="frow"><label class="lbl">Tarih</label>
+          <input class="inp" type="date" id="ggTarih" style="padding:9px 10px;font-size:13px"></div>
+        <button class="btn btn-accent" onclick="saveGG()">Kaydet</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+      <button class="ftab active" onclick="setGGPeriod('daily',this)" style="padding:10px 4px;font-size:12px">Bugün</button>
+      <button class="ftab" onclick="setGGPeriod('weekly',this)" style="padding:10px 4px;font-size:12px">Haftalık</button>
+      <button class="ftab" onclick="setGGPeriod('monthly',this)" style="padding:10px 4px;font-size:12px">Aylık</button>
+      <button class="ftab" onclick="setGGPeriod('yearly',this)" style="padding:10px 4px;font-size:12px">Yıllık</button>
+      <button class="ftab" onclick="setGGPeriod('all',this)" style="padding:10px 4px;font-size:12px">Tümü</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+        <label class="lbl">Başlangıç</label>
+        <input class="inp" type="date" id="ggFilterStart" onchange="setGGPeriod('custom',null)" style="padding:8px 10px;font-size:13px">
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+        <label class="lbl">Bitiş</label>
+        <input class="inp" type="date" id="ggFilterEnd" onchange="setGGPeriod('custom',null)" style="padding:8px 10px;font-size:13px">
+      </div>
+      <button onclick="clearGGFilter()" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:8px 10px;font-size:12px;cursor:pointer;white-space:nowrap">Temizle</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-label">Araç Geliri</div><div class="stat-val" style="color:var(--success)" id="ggAracGelir">₺0</div></div>
+      <div class="stat-box"><div class="stat-label">Diğer Gelir</div><div class="stat-val" style="color:var(--accent2)" id="ggDigerGelir">₺0</div></div>
+      <div class="stat-box"><div class="stat-label">Toplam Gider</div><div class="stat-val" style="color:var(--danger)" id="ggToplamGider">₺0</div></div>
+      <div class="stat-box"><div class="stat-label">Net Kar</div><div class="stat-val" style="color:var(--success)" id="ggNetKar">₺0</div></div>
+    </div>
+
+    <div class="profit-card">
+      <div class="card-title">📊 Dönem Özeti</div>
+      <div class="prow"><span style="color:var(--muted)">Araç Gelirleri</span><span id="ggSAracGelir" style="color:var(--success);font-weight:600">₺0</span></div>
+      <div class="prow"><span style="color:var(--muted)">Diğer Gelirler</span><span id="ggSDigerGelir" style="color:var(--accent2);font-weight:600">₺0</span></div>
+      <div class="prow"><span style="color:var(--muted)">Araç Maliyetleri</span><span id="ggSAracMaliyet" style="color:var(--danger);font-weight:600">₺0</span></div>
+      <div class="prow"><span style="color:var(--muted)">Diğer Giderler</span><span id="ggSDigerGider" style="color:var(--danger);font-weight:600">₺0</span></div>
+      <div class="prow"><span style="font-weight:600;font-size:15px">Net Kar</span><span id="ggSNetKar" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--success)">₺0</span></div>
+    </div>
+
+    <div id="ggList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <!-- VERESİYE -->
+  <div class="page" id="pageVeresiye">
+    <div style="position:relative">
+      <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none">🔍</span>
+      <input class="inp" type="text" id="veresiyeSearch" placeholder="Plaka, müşteri, telefon, not..." oninput="loadVeresiye()" style="padding-left:38px">
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-size:13px;color:var(--muted)" id="veresiyeSummary"></div>
+    </div>
+    <div id="veresiyeList" style="display:flex;flex-direction:column;gap:8px"></div>
   </div>
 
   <!-- YÖNETİM -->
@@ -408,13 +515,20 @@ textarea.inp{resize:vertical;min-height:72px}
     </div>
   </div>
 
+  <div id="extraBackdrop" onclick="closeExtra()"></div>
+  <div id="extraMenu">
+    <div class="bnav-extra-item" onclick="goExtra('pageArsiv')"><span class="ei">🗂</span><span>Arşiv</span></div>
+    <div class="bnav-extra-item" onclick="goExtra('pageStats')"><span class="ei">📊</span><span>İstatistik</span></div>
+    <div class="bnav-extra-item" onclick="goExtra('pageVeresiye')"><span class="ei">📋</span><span>Veresiye</span></div>
+    <div class="bnav-extra-item" onclick="goExtra('pageGelirGider')"><span class="ei">💰</span><span>Kasa</span></div>
+    <div class="bnav-extra-item" onclick="goExtra('pageAdmin')"><span class="ei">⚙️</span><span>Yönetim</span></div>
+    <div class="bnav-extra-item" onclick="goExtra('superara')"><span class="ei">🔎</span><span>Gelişmiş Arama</span></div>
+  </div>
+
   <nav class="bottomnav">
     <button class="bnav active" onclick="showPage('pageAktif',this)" id="bnAktif"><span class="bnav-ic">🚗</span><span>Güncel İşler</span></button>
     <button class="bnav" onclick="showPage('pageEkle',this)" id="bnEkle"><span class="bnav-ic">➕</span><span>Yeni Kayıt</span></button>
-    <button class="bnav" onclick="showPage('pageArsiv',this);renderArsiv()" id="bnArsiv" style="display:none"><span class="bnav-ic">🗂</span><span>Arşiv</span></button>
-    <button class="bnav" onclick="showPage('pageStats',this);loadStats()" id="bnStats" style="display:none"><span class="bnav-ic">📊</span><span>İstatistik</span></button>
-    <button class="bnav" onclick="showPage('pageAdmin',this);loadUsers()" id="bnAdmin" style="display:none"><span class="bnav-ic">⚙️</span><span>Yönetim</span></button>
-    <button class="bnav" onclick="openSuperAra()" id="bnAra" style="display:none"><span class="bnav-ic">🔎</span><span>Ara</span></button>
+    <button class="bnav" id="bnMore" onclick="toggleExtra()"><span class="bnav-ic" id="moreIcon">☰</span><span>Menü</span></button>
   </nav>
 </div>
 
@@ -515,13 +629,45 @@ function startApp(){
   document.getElementById('app').style.display='flex';
   document.getElementById('topbarUser').textContent=currentUser.name;
   document.getElementById('adminBadge').style.display=isAdmin?'inline':'none';
-  if(isAdmin){
-    document.getElementById('bnStats').style.display='flex';
-    document.getElementById('bnAdmin').style.display='flex';
-    document.getElementById('bnArsiv').style.display='flex';
-    document.getElementById('bnAra').style.display='flex';
+  // Admin değilse menü butonu gizle
+  if(!isAdmin){
+    const bm=document.getElementById('bnMore');
+    if(bm) bm.style.display='none';
   }
+  try{
+    const ggTarih=document.getElementById('ggTarih');
+    if(ggTarih) ggTarih.value=new Date().toISOString().split('T')[0];
+  }catch(e){}
   listenVehicles();
+}
+
+window.toggleExtra=function(){
+  const m=document.getElementById('extraMenu');
+  const b=document.getElementById('extraBackdrop');
+  const open=m.classList.contains('open');
+  if(open){closeExtra();}
+  else{
+    m.classList.add('open');
+    b.classList.add('open');
+    document.getElementById('moreIcon').textContent='✕';
+  }
+}
+
+window.closeExtra=function(){
+  document.getElementById('extraMenu').classList.remove('open');
+  document.getElementById('extraBackdrop').classList.remove('open');
+  document.getElementById('moreIcon').textContent='☰';
+}
+
+window.goExtra=function(target){
+  closeExtra();
+  if(target==='superara'){openSuperAra();return;}
+  showPage(target,null);
+  if(target==='pageArsiv')renderArsiv();
+  if(target==='pageStats')loadStats();
+  if(target==='pageVeresiye')loadVeresiye();
+  if(target==='pageGelirGider')loadGG();
+  if(target==='pageAdmin')loadUsers();
 }
 
 function listenVehicles(){
@@ -571,6 +717,7 @@ function vcHTML(v){
       ${v.photos?.length?`<span>📷 ${v.photos.length}</span>`:''}
       ${v.ecu?`<span>⚙️ ${v.ecu.replace('Bosch ','').replace('Siemens ','').replace('Delphi ','')}</span>`:''}
       ${isAdmin&&v.status==='done'&&v.fiyat?`<span style="color:var(--success)">₺${v.fiyat}</span>`:''}
+    ${isAdmin&&v.veresiye?`<span style="color:var(--accent);font-weight:600">📋 VERESİYE ₺${(v.fiyat||0)-(v.pesin||0)}</span>`:''}
     </div>
     ${yazBadge?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${yazBadge}</div>`:''}
   </div>`;
@@ -591,7 +738,12 @@ window.clearFilters=function(){
 }
 
 // ── DETAY ──
-window.openDetail=async function(id){
+window.openDetail=async function(id,readonly=false){
+  // Arşiv veya istatistik sayfasından açılıyorsa readonly
+  const activePage=document.querySelector('.page.active')?.id;
+  // İstatistik readonly; Arşiv'de admin düzenleyebilir, personel readonly
+  if(activePage==='pageStats') readonly=true;
+  if(activePage==='pageArsiv' && !isAdmin) readonly=true;
   const v=vehicles.find(x=>x.id===id);if(!v)return;
   document.getElementById('modalPlaka').textContent=v.plaka||'-';
   const body=document.getElementById('modalBody');
@@ -603,21 +755,47 @@ window.openDetail=async function(id){
     else phHTML+=`<div class="photo-slot-empty"></div>`;
   }
   const yazBadge=v.yazilimAktif&&v.yazilimIslemleri?.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${v.yazilimIslemleri.map(i=>`<span class="pill pill-yaz">${i}</span>`).join('')}</div>`:'';
-  const adminFin=isAdmin?`
+  const adminFin=isAdmin&&!readonly?`
     <div class="profit-card">
       <div class="card-title">💰 Finansal Bilgiler</div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div class="frow"><label class="lbl">Maliyet (₺)</label><input class="inp" type="number" id="dMaliyet" value="${v.maliyet||''}" placeholder="0" oninput="calcP()"></div>
-        <div class="frow"><label class="lbl">Alınan Ödeme (₺)</label><input class="inp" type="number" id="dFiyat" value="${v.fiyat||''}" placeholder="0" oninput="calcP()"></div>
+        <div class="frow"><label class="lbl">Toplam Ücret (₺)</label><input class="inp" type="number" id="dFiyat" value="${v.fiyat||''}" placeholder="0" oninput="calcP()"></div>
+        <div class="frow">
+          <label class="lbl">Ödeme Durumu</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+            <label class="chk-label" style="justify-content:center" id="lblTahsil">
+              <input type="radio" name="odeme" value="tahsil" ${!v.veresiye?'checked':''} onchange="updateOdeme(this)"> ✅ Tahsil Edildi
+            </label>
+            <label class="chk-label" style="justify-content:center;border-color:${v.veresiye?'var(--accent)':'var(--border)'}" id="lblVeresiye">
+              <input type="radio" name="odeme" value="veresiye" ${v.veresiye?'checked':''} onchange="updateOdeme(this)"> 📋 Veresiye
+            </label>
+          </div>
+        </div>
+        <div id="veresiyePanel" style="display:${v.veresiye?'flex':'none'};flex-direction:column;gap:8px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:12px">
+          <div class="frow"><label class="lbl">Peşin Alınan (₺)</label><input class="inp" type="number" id="dPesin" value="${v.pesin||0}" placeholder="0" oninput="calcP()"></div>
+          <div class="prow"><span style="color:var(--muted);font-size:13px">Kalan Borç</span><span id="dKalan" style="font-size:18px;color:var(--accent);font-weight:600">₺${((v.fiyat||0)-(v.pesin||0))}</span></div>
+          <div class="frow"><label class="lbl">Vade / Not</label><input class="inp" type="text" id="dVeresiyeNot" value="${v.veresiyeNot||''}" placeholder="Örn: Cuma ödeyecek, hafta sonu..."></div>
+        </div>
         <div class="prow"><span style="color:var(--muted)">Net Kar</span><span id="dKar" style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--success)">${v.fiyat&&v.maliyet?'₺'+((v.fiyat||0)-(v.maliyet||0)):(v.fiyat?'₺'+v.fiyat:'–')}</span></div>
       </div>
     </div>`:'';
-  const actionBtns=isAdmin?`
+  // Veresiye sayfasından açılıyorsa özel butonlar
+  const isVeresiyePage=activePage==='pageVeresiye';
+  const actionBtns=readonly?'':(isAdmin?(isVeresiyePage?`
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-success btn-sm" style="flex:1" onclick="tahsilatTamamla('${id}')">✅ Tahsilat Tamamlandı</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveDetail('${id}','done')">💾 Güncelle</button>
+    </div>`:(v.status==='done'?`
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveDetail('${id}','done')">💾 Güncelle</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteV('${id}')">🗑</button>
+    </div>`:`
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-success btn-sm" style="flex:1" onclick="saveDetail('${id}','done')">✅ Tamamla</button>
       <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveDetail('${id}','active')">💾 Güncelle</button>
       <button class="btn btn-danger btn-sm" onclick="deleteV('${id}')">🗑</button>
-    </div>`:`<button class="btn btn-ghost btn-sm" onclick="updateAriza('${id}')">Arızayı Güncelle</button>`;
+    </div>`)):`<button class="btn btn-ghost btn-sm" onclick="updateAriza('${id}')">Arızayı Güncelle</button>`);
 
   const dosyaBtn=v.yazilimAktif?`<div style="display:flex;gap:8px;flex-wrap:wrap">
     ${v.orijinalDosya?`<button class="btn btn-ghost btn-sm" onclick="dlFile('${id}','ori')">⬇ Orijinal: ${v.orijinalDosya.name||'dosya'}</button>`:'<span style="font-size:12px;color:var(--muted)">Orijinal yok</span>'}
@@ -634,8 +812,31 @@ window.openDetail=async function(id){
     ${yazBadge}
     ${v.yazilimAktif&&dosyaBtn?`<div class="card" style="background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.2);padding:12px"><div class="card-title">Yazılım Dosyaları</div>${dosyaBtn}${v.yazilimNot?`<div style="font-size:13px;color:var(--muted);margin-top:8px">${v.yazilimNot}</div>`:''}</div>`:''}
 
-    <div class="frow"><label class="lbl">Arıza</label><textarea class="inp" id="dAriza" ${isAdmin?'':'readonly'}>${v.ariza||''}</textarea></div>
-    <div class="frow"><label class="lbl">Yapılan İşlem</label><textarea class="inp" id="dIslem">${v.islem||''}</textarea></div>
+    ${isAdmin&&readonly?`
+    <div class="profit-card">
+      <div class="card-title">💰 Finansal Bilgiler</div>
+      <div class="prow"><span style="color:var(--muted)">Toplam Ücret</span><span style="font-weight:600;color:var(--accent2)">₺${(v.fiyat||0).toLocaleString('tr-TR')}</span></div>
+      <div class="prow"><span style="color:var(--muted)">Maliyet</span><span style="font-weight:600;color:var(--danger)">₺${(v.maliyet||0).toLocaleString('tr-TR')}</span></div>
+      <div class="prow"><span style="color:var(--muted)">Net Kar</span><span style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--success)">₺${((v.fiyat||0)-(v.maliyet||0)).toLocaleString('tr-TR')}</span></div>
+      ${v.veresiye?`<div class="prow"><span style="color:var(--muted)">Ödeme</span><span style="color:var(--accent);font-weight:600">📋 Veresiye — Kalan: ₺${((v.fiyat||0)-(v.pesin||0)).toLocaleString('tr-TR')}</span></div>`:''}
+    </div>`:''}
+    ${isAdmin&&!readonly?`
+    <div class="frow"><label class="lbl">Plaka</label><input class="inp" id="dPlaka" value="${v.plaka||''}"></div>
+    <div class="frow"><label class="lbl">Müşteri Adı</label><input class="inp" id="dMusteri" value="${v.musteri||''}"></div>
+    <div class="frow"><label class="lbl">Telefon</label><input class="inp" id="dTelefon" value="${v.telefon||''}"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="frow"><label class="lbl">Marka</label><input class="inp" id="dMarka" value="${v.marka||''}" list="markaList"></div>
+      <div class="frow"><label class="lbl">Model</label><input class="inp" id="dModel" value="${v.model||''}"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="frow"><label class="lbl">Yıl</label><input class="inp" id="dYil" value="${v.yil||''}" maxlength="4"></div>
+      <div class="frow"><label class="lbl">Motor</label><input class="inp" id="dMotor" value="${v.motor||''}"></div>
+    </div>
+    <div class="frow"><label class="lbl">ECU</label><input class="inp" id="dEcu" value="${v.ecu||''}" list="ecuList"></div>
+    <div class="frow"><label class="lbl">ECU Part No</label><input class="inp" id="dEcuNo" value="${v.ecuNo||''}"></div>
+    `:''}
+    <div class="frow"><label class="lbl">Arıza</label><textarea class="inp" id="dAriza" ${(isAdmin&&!readonly)?'':'readonly'}>${v.ariza||''}</textarea></div>
+    <div class="frow"><label class="lbl">Yapılan İşlem</label><textarea class="inp" id="dIslem" ${readonly?'readonly':''}>${v.islem||''}</textarea></div>
     <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Fotoğraflar (${photos.length}/8)</div>
     <div class="photo-grid">${phHTML}</div>
     <input type="file" id="camInputEdit" accept="image/*" capture="environment" multiple style="display:none" onchange="handlePhotoEdit(event,'${id}')"></div>
@@ -648,8 +849,24 @@ window.openDetail=async function(id){
 window.calcP=function(){
   const f=parseFloat(document.getElementById('dFiyat')?.value)||0;
   const m=parseFloat(document.getElementById('dMaliyet')?.value)||0;
+  const p=parseFloat(document.getElementById('dPesin')?.value)||0;
   const el=document.getElementById('dKar');
   if(el){el.textContent='₺'+(f-m);el.style.color=(f-m)>=0?'var(--success)':'var(--danger)';}
+  const kalan=document.getElementById('dKalan');
+  if(kalan)kalan.textContent='₺'+(f-p);
+}
+
+window.updateOdeme=function(radio){
+  const panel=document.getElementById('veresiyePanel');
+  const lblV=document.getElementById('lblVeresiye');
+  if(radio.value==='veresiye'){
+    panel.style.display='flex';
+    if(lblV)lblV.style.borderColor='var(--accent)';
+  } else {
+    panel.style.display='none';
+    if(lblV)lblV.style.borderColor='var(--border)';
+  }
+  calcP();
 }
 
 window.closeModal=function(){document.getElementById('detailModal').classList.remove('open');}
@@ -660,8 +877,24 @@ window.saveDetail=async function(id,status){
     const islem=document.getElementById('dIslem')?.value||'';
     const fiyat=parseFloat(document.getElementById('dFiyat')?.value)||0;
     const maliyet=parseFloat(document.getElementById('dMaliyet')?.value)||0;
-    const upd={ariza,islem,fiyat,maliyet,status};
+    const veresiye=document.querySelector('input[name="odeme"]:checked')?.value==='veresiye';
+    const pesin=parseFloat(document.getElementById('dPesin')?.value)||0;
+    const veresiyeNot=document.getElementById('dVeresiyeNot')?.value||'';
+    const upd={ariza,islem,fiyat,maliyet,status,veresiye,pesin,veresiyeNot};
     if(status==='done')upd.closedAt=serverTimestamp();
+    // Admin ek alanlar
+    if(isAdmin){
+      const dg=id=>{const el=document.getElementById(id);return el?el.value.trim():null;}
+      if(dg('dPlaka'))upd.plaka=dg('dPlaka');
+      if(dg('dMusteri'))upd.musteri=dg('dMusteri');
+      if(dg('dTelefon'))upd.telefon=dg('dTelefon');
+      if(dg('dMarka')!==null)upd.marka=dg('dMarka');
+      if(dg('dModel')!==null)upd.model=dg('dModel');
+      if(dg('dYil')!==null)upd.yil=dg('dYil');
+      if(dg('dMotor')!==null)upd.motor=dg('dMotor');
+      if(dg('dEcu')!==null)upd.ecu=dg('dEcu');
+      if(dg('dEcuNo')!==null)upd.ecuNo=dg('dEcuNo');
+    }
     await updateDoc(doc(db,'vehicles',id),upd);
     const idx=vehicles.findIndex(v=>v.id===id);
     if(idx>-1)vehicles[idx]={...vehicles[idx],...upd,fiyat,maliyet};
@@ -680,6 +913,35 @@ window.updateAriza=async function(id){
   const islem=document.getElementById('dIslem')?.value||'';
   await updateDoc(doc(db,'vehicles',id),{ariza,islem});
   toast('Güncellendi','success');closeModal();
+}
+
+window.tahsilatTamamla=async function(id){
+  const v=vehicles.find(x=>x.id===id);
+  if(!v)return;
+  const fiyat=parseFloat(document.getElementById('dFiyat')?.value)||v.fiyat||0;
+  const maliyet=parseFloat(document.getElementById('dMaliyet')?.value)||v.maliyet||0;
+  const veresiyeNot=document.getElementById('dVeresiyeNot')?.value||v.veresiyeNot||'';
+  const ariza=document.getElementById('dAriza')?.value||v.ariza||'';
+  const islem=document.getElementById('dIslem')?.value||v.islem||'';
+  // Tahsilat tamamlandı - veresiye kaldır, tam fiyatı peşin say
+  const upd={
+    veresiye:false,
+    pesin:fiyat,
+    fiyat,maliyet,ariza,islem,veresiyeNot,
+    status:'done',
+    tahsilatTarihi:serverTimestamp()
+  };
+  try{
+    await updateDoc(doc(db,'vehicles',id),upd);
+    const idx=vehicles.findIndex(x=>x.id===id);
+    if(idx>-1)vehicles[idx]={...vehicles[idx],...upd};
+    toast('Tahsilat tamamlandı, arşive geçti ✅','success');
+  }catch(e){
+    toast('Hata: '+e.message,'error');
+  }finally{
+    closeModal();
+    loadVeresiye();
+  }
 }
 
 window.deleteV=async function(id){
@@ -719,9 +981,35 @@ window.handlePhotoEdit=async function(e,id){
 }
 
 // ── CLOUDINARY UPLOAD ──
+async function compressBeforeUpload(file, maxW=1200, quality=0.75) {
+  // Resim dosyası değilse sıkıştırma
+  if(!file.type.startsWith('image/')) return file;
+  return new Promise(res=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const canvas=document.createElement('canvas');
+        let w=img.width, h=img.height;
+        if(w>maxW||h>maxW){
+          if(w>h){h=Math.round(h*maxW/w);w=maxW;}
+          else{w=Math.round(w*maxW/h);h=maxW;}
+        }
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        canvas.toBlob(blob=>res(new File([blob],file.name,{type:'image/jpeg'})),'image/jpeg',quality);
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 async function uploadToCloudinary(file, folder='vehicles') {
+  // Fotoğrafları yüklemeden önce sıkıştır
+  const compressed = await compressBeforeUpload(file);
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', compressed);
   formData.append('upload_preset', CLOUDINARY.uploadPreset);
   formData.append('folder', 'beyin_fakultesi/' + folder);
   
@@ -859,6 +1147,7 @@ window.renderArsiv=function(){
   const sDate=sd?new Date(sd):null;
   const eDate=ed?new Date(ed+'T23:59:59'):null;
   let list=vehicles.filter(v=>{
+    if(v.status!=='done') return false; // sadece tamamlananlar
     const d=v.createdAt?.seconds?new Date(v.createdAt.seconds*1000):new Date(v.createdAt||Date.now());
     if(sDate&&d<sDate)return false;
     if(eDate&&d>eDate)return false;
@@ -892,6 +1181,7 @@ window.renderArsiv=function(){
       </div>`:''} 
       ${yazB}
       <div class="meta"><span>📅 ${fmtDate(v.createdAt)}</span>${isAdmin&&v.fiyat?`<span style="color:var(--success)">₺${v.fiyat} · Kar: ₺${(v.fiyat||0)-(v.maliyet||0)}</span>`:''}</div>
+      ${isAdmin&&v.veresiye?`<div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:6px 10px;font-size:12px;margin-top:4px">📋 Veresiye — Kalan: ₺${(v.fiyat||0)-(v.pesin||0)}${v.veresiyeNot?' · '+v.veresiyeNot:''}</div>`:''} 
     </div>`;
   }).join('');
 }
@@ -920,32 +1210,105 @@ window.exportArsiv=function(){
 let statPeriod='daily';
 window.setStatPeriod=function(p,btn){
   statPeriod=p;
-  document.querySelectorAll('#pageStats .ftab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');loadStats();
+  if(btn){
+    document.querySelectorAll('#pageStats .ftab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    if(p!=='custom'){
+      const s=document.getElementById('statFilterStart');
+      const e=document.getElementById('statFilterEnd');
+      if(s)s.value=''; if(e)e.value='';
+    }
+  }
+  loadStats();
+}
+
+window.clearStatFilter=function(){
+  document.getElementById('statFilterStart').value='';
+  document.getElementById('statFilterEnd').value='';
+  statPeriod='daily';
+  document.querySelectorAll('#pageStats .ftab').forEach((b,i)=>{b.classList.remove('active');if(i===0)b.classList.add('active');});
+  loadStats();
+}
+
+window.toggleMaliyetDetay=function(){
+  const d=document.getElementById('maliyetDetay');
+  const a=document.getElementById('maliyetArrow');
+  if(!d)return;
+  const open=d.style.display==='flex';
+  d.style.display=open?'none':'flex';
+  if(a)a.textContent=open?'▼':'▲';
 }
 
 window.loadStats=function(){
   const now=new Date();
-  const list=vehicles.filter(v=>{
-    const d=v.createdAt?.seconds?new Date(v.createdAt.seconds*1000):new Date(v.createdAt||Date.now());
+  // Tamamlanan işler: kapanış tarihine göre filtrele
+  // Devam edenler: kayıt tarihine göre filtrele
+  const statStart=document.getElementById('statFilterStart')?.value;
+  const statEnd=document.getElementById('statFilterEnd')?.value;
+  const sDate=statStart?new Date(statStart):null;
+  const eDate=statEnd?new Date(statEnd+'T23:59:59'):null;
+
+  const periodMatch=(d)=>{
+    if(sDate||eDate) return (!sDate||d>=sDate)&&(!eDate||d<=eDate);
+    if(statPeriod==='all') return true;
     if(statPeriod==='daily')return d.toDateString()===now.toDateString();
     if(statPeriod==='weekly'){const ws=new Date(now);ws.setDate(now.getDate()-now.getDay());return d>=ws;}
     if(statPeriod==='monthly')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+    if(statPeriod==='yearly')return d.getFullYear()===now.getFullYear();
     return true;
+  };
+
+  const done=vehicles.filter(v=>{
+    if(v.status!=='done') return false;
+    const d=v.closedAt?.seconds?new Date(v.closedAt.seconds*1000):
+             v.createdAt?.seconds?new Date(v.createdAt.seconds*1000):new Date(v.createdAt||Date.now());
+    return periodMatch(d);
   });
-  const done=list.filter(v=>v.status==='done');
-  const gelir=done.reduce((s,v)=>s+(parseFloat(v.fiyat)||0),0);
+  const list=vehicles.filter(v=>{
+    const d=v.createdAt?.seconds?new Date(v.createdAt.seconds*1000):new Date(v.createdAt||Date.now());
+    return periodMatch(d);
+  });
+  // Tahsil edilmiş gelir: veresiyede sadece peşin alınan, tahsil edilmişte tamamı
+  const gelir=done.reduce((s,v)=>s+(v.veresiye?(parseFloat(v.pesin)||0):(parseFloat(v.fiyat)||0)),0);
   const maliyet=done.reduce((s,v)=>s+(parseFloat(v.maliyet)||0),0);
   const kar=gelir-maliyet;
   document.getElementById('sToplam').textContent=list.length;
   document.getElementById('sTamamlanan').textContent=done.length;
   document.getElementById('sDevam').textContent=list.filter(v=>v.status==='active').length;
   document.getElementById('sKar').textContent='₺'+kar.toLocaleString('tr-TR');
+  const veresiyeList=done.filter(v=>v.veresiye);
+  const veresiyeToplam=veresiyeList.reduce((s,v)=>s+((parseFloat(v.fiyat)||0)-(parseFloat(v.pesin)||0)),0);
   document.getElementById('pGelir').textContent='₺'+gelir.toLocaleString('tr-TR');
   document.getElementById('pMaliyet').textContent='₺'+maliyet.toLocaleString('tr-TR');
   const karEl=document.getElementById('pKar');
   karEl.textContent='₺'+kar.toLocaleString('tr-TR');
   karEl.style.color=kar>=0?'var(--success)':'var(--danger)';
+  const vEl=document.getElementById('pVeresiye');
+  if(vEl)vEl.textContent='₺'+veresiyeToplam.toLocaleString('tr-TR');
+  const vaEl=document.getElementById('pVeresiyeAdet');
+  if(vaEl)vaEl.textContent=veresiyeList.length+' araç';
+
+  // Maliyet detay listesini doldur
+  const maliyetDetay=document.getElementById('maliyetDetay');
+  if(maliyetDetay){
+    const maliyetliAraclar=done.filter(v=>parseFloat(v.maliyet)>0).sort((a,b)=>(parseFloat(b.maliyet)||0)-(parseFloat(a.maliyet)||0));
+    if(!maliyetliAraclar.length){
+      maliyetDetay.innerHTML='<div style="font-size:12px;color:var(--muted);padding:4px 0">Maliyet girilen araç yok</div>';
+    } else {
+      maliyetDetay.innerHTML=maliyetliAraclar.map(v=>`
+        <div onclick="openDetail('${v.id}')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface2);border-radius:8px;cursor:pointer;border-left:3px solid var(--danger)">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px">${v.plaka||'-'}</div>
+            <div style="font-size:11px;color:var(--muted)">${v.musteri||'-'} · ${v.marka||''} ${v.model||''}</div>
+            <div style="font-size:11px;color:var(--muted)">${fmtDate(v.closedAt||v.createdAt)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:15px;color:var(--danger);font-weight:600">₺${(parseFloat(v.maliyet)||0).toLocaleString('tr-TR')}</div>
+            <div style="font-size:11px;color:var(--muted)">Gelir: ₺${(parseFloat(v.fiyat)||0).toLocaleString('tr-TR')}</div>
+          </div>
+        </div>`).join('');
+    }
+  }
   document.getElementById('statsList').innerHTML=done.slice(0,30).map(v=>`
     <div class="vc" onclick="openDetail('${v.id}')">
       <div style="display:flex;justify-content:space-between;align-items:center">
@@ -957,6 +1320,207 @@ window.loadStats=function(){
         </div>
       </div>
     </div>`).join('');
+}
+
+// ── GELİR GİDER ──
+const GG_KATEGORILER = {
+  gelir: ['Nakit Gelir','Havale/EFT','Araç Dışı Servis','Dışarıdan Beyin Tamiri','Diğer Gelir'],
+  gider: ['Kira','Maaş/Personel','Elektrik','Su','Doğalgaz','İnternet','Malzeme Alımı','Takım/Ekipman','Vergi/SGK','Yakıt','Yemek','Kargo','Reklam','Diğer Gider']
+};
+
+window.toggleGGTip = function(radio) {
+  const sel = document.getElementById('ggKategori');
+  sel.innerHTML = '<option value="">-- Seçin --</option>';
+  GG_KATEGORILER[radio.value].forEach(k => {
+    sel.innerHTML += `<option>${k}</option>`;
+  });
+}
+
+// Sayfa açılınca kategori listesini doldur
+setTimeout(()=>{
+  const sel = document.getElementById('ggKategori');
+  if(sel && sel.options.length<=1) {
+    GG_KATEGORILER.gelir.forEach(k => sel.innerHTML += `<option>${k}</option>`);
+  }
+  const tarih = document.getElementById('ggTarih');
+  if(tarih && !tarih.value) tarih.value = new Date().toISOString().split('T')[0];
+}, 500);
+
+let ggPeriod = 'monthly';
+
+window.setGGPeriod = function(p, btn) {
+  ggPeriod = p;
+  if(btn) {
+    document.querySelectorAll('#pageGelirGider .ftab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    // Tarih aralığını temizle
+    if(p!=='custom'){
+      const s=document.getElementById('ggFilterStart');
+      const e=document.getElementById('ggFilterEnd');
+      if(s)s.value=''; if(e)e.value='';
+    }
+  }
+  loadGG();
+}
+
+window.clearGGFilter = function() {
+  document.getElementById('ggFilterStart').value='';
+  document.getElementById('ggFilterEnd').value='';
+  ggPeriod='monthly';
+  document.querySelectorAll('#pageGelirGider .ftab').forEach((b,i)=>{b.classList.remove('active');if(i===2)b.classList.add('active');});
+  loadGG();
+}
+
+window.saveGG = async function() {
+  const tip = document.querySelector('input[name="ggTip"]:checked')?.value;
+  const kategori = document.getElementById('ggKategori').value;
+  const aciklama = document.getElementById('ggAciklama').value.trim();
+  const tutar = parseFloat(document.getElementById('ggTutar').value)||0;
+  const tarihVal = document.getElementById('ggTarih').value;
+  if(!kategori||!tutar||!tarihVal){toast('Kategori, tutar ve tarih gerekli','error');return;}
+  const data = {
+    tip, kategori, aciklama, tutar,
+    tarih: new Date(tarihVal),
+    tarihStr: tarihVal,
+    ekleyen: currentUser.name,
+    createdAt: serverTimestamp()
+  };
+  try {
+    await addDoc(collection(db,'gelirGider'), data);
+    toast('Kaydedildi ✅','success');
+    document.getElementById('ggTutar').value='';
+    document.getElementById('ggAciklama').value='';
+    loadGG();
+  } catch(e) { toast('Hata: '+e.message,'error'); }
+}
+
+window.loadGG = async function() {
+  const now = new Date();
+  // Manuel GG kayıtlarını çek
+  let ggDocs = [];
+  try {
+    const snap = await getDocs(query(collection(db,'gelirGider'), orderBy('createdAt','desc')));
+    ggDocs = snap.docs.map(d=>({id:d.id,...d.data()}));
+  } catch(e) { console.error(e); }
+
+  // Dönem filtresi
+  const ggStart=document.getElementById('ggFilterStart')?.value;
+  const ggEnd=document.getElementById('ggFilterEnd')?.value;
+  const ggSDate=ggStart?new Date(ggStart):null;
+  const ggEDate=ggEnd?new Date(ggEnd+'T23:59:59'):null;
+
+  const filterByPeriod = (tarihStr) => {
+    const d = new Date(tarihStr);
+    if(ggSDate||ggEDate) return (!ggSDate||d>=ggSDate)&&(!ggEDate||d<=ggEDate);
+    if(ggPeriod==='daily') return d.toDateString()===now.toDateString();
+    if(ggPeriod==='weekly'){const ws=new Date(now);ws.setDate(now.getDate()-now.getDay());return d>=ws;}
+    if(ggPeriod==='monthly') return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+    if(ggPeriod==='yearly') return d.getFullYear()===now.getFullYear();
+    return true;
+  };
+
+  const filteredGG = ggDocs.filter(g=>filterByPeriod(g.tarihStr||g.tarih?.toDate?.()?.toISOString?.()?.split('T')[0]||''));
+
+  // Araç gelirleri (vehicles'tan)
+  const aracDone = vehicles.filter(v=>{
+    if(v.status!=='done') return false;
+    const d=v.closedAt?.seconds?new Date(v.closedAt.seconds*1000):v.createdAt?.seconds?new Date(v.createdAt.seconds*1000):new Date();
+    if(ggPeriod==='daily') return d.toDateString()===now.toDateString();
+    if(ggPeriod==='weekly'){const ws=new Date(now);ws.setDate(now.getDate()-now.getDay());return d>=ws;}
+    if(ggPeriod==='monthly') return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+    if(ggPeriod==='yearly') return d.getFullYear()===now.getFullYear();
+    return true;
+  });
+
+  const aracGelir = aracDone.reduce((s,v)=>s+(v.veresiye?(parseFloat(v.pesin)||0):(parseFloat(v.fiyat)||0)),0);
+  const aracMaliyet = aracDone.reduce((s,v)=>s+(parseFloat(v.maliyet)||0),0);
+  const digerGelir = filteredGG.filter(g=>g.tip==='gelir').reduce((s,g)=>s+(g.tutar||0),0);
+  const digerGider = filteredGG.filter(g=>g.tip==='gider').reduce((s,g)=>s+(g.tutar||0),0);
+  const netKar = (aracGelir+digerGelir) - (aracMaliyet+digerGider);
+
+  const fmt = v => '₺'+v.toLocaleString('tr-TR');
+  document.getElementById('ggAracGelir').textContent=fmt(aracGelir);
+  document.getElementById('ggDigerGelir').textContent=fmt(digerGelir);
+  document.getElementById('ggToplamGider').textContent=fmt(aracMaliyet+digerGider);
+  document.getElementById('ggNetKar').textContent=fmt(netKar);
+  document.getElementById('ggNetKar').style.color=netKar>=0?'var(--success)':'var(--danger)';
+  document.getElementById('ggSAracGelir').textContent=fmt(aracGelir);
+  document.getElementById('ggSDigerGelir').textContent=fmt(digerGelir);
+  document.getElementById('ggSAracMaliyet').textContent=fmt(aracMaliyet);
+  document.getElementById('ggSDigerGider').textContent=fmt(digerGider);
+  const netEl=document.getElementById('ggSNetKar');
+  netEl.textContent=fmt(netKar);
+  netEl.style.color=netKar>=0?'var(--success)':'var(--danger)';
+
+  // Liste
+  const el = document.getElementById('ggList');
+  if(!filteredGG.length){
+    el.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted)">Bu dönemde kayıt yok</div>';
+    return;
+  }
+  el.innerHTML = filteredGG.map(g=>`
+    <div class="vc" style="border-left:3px solid ${g.tip==='gelir'?'var(--success)':'var(--danger)'}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:13px;font-weight:500">${g.kategori}</div>
+          ${g.aciklama?`<div style="font-size:12px;color:var(--muted)">${g.aciklama}</div>`:''}
+          <div style="font-size:11px;color:var(--muted)">${g.tarihStr||'-'} · ${g.ekleyen||'-'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${g.tip==='gelir'?'var(--success)':'var(--danger)'}">${g.tip==='gelir'?'+':'-'}₺${(g.tutar||0).toLocaleString('tr-TR')}</span>
+          <button onclick="deleteGG('${g.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:4px">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.deleteGG = async function(id) {
+  if(!confirm('Bu kaydı silmek istiyor musunuz?')) return;
+  await deleteDoc(doc(db,'gelirGider',id));
+  toast('Silindi','success');
+  loadGG();
+}
+
+// ── VERESİYE LİSTESİ ──
+window.loadVeresiye=function(){
+  const s=(document.getElementById('veresiyeSearch')?.value||'').toLowerCase().trim();
+  let list=vehicles.filter(v=>v.status==='done'&&v.veresiye);
+  if(s){
+    list=list.filter(v=>
+      v.plaka?.toLowerCase().includes(s)||
+      v.musteri?.toLowerCase().includes(s)||
+      v.telefon?.toLowerCase().includes(s)||
+      v.veresiyeNot?.toLowerCase().includes(s)||
+      v.marka?.toLowerCase().includes(s)||
+      v.model?.toLowerCase().includes(s)
+    );
+  }
+  const toplam=list.reduce((s,v)=>s+((parseFloat(v.fiyat)||0)-(parseFloat(v.pesin)||0)),0);
+  const el=document.getElementById('veresiyeList');
+  const sum=document.getElementById('veresiyeSummary');
+  if(sum) sum.innerHTML=`<span style="font-size:15px;font-weight:600;color:var(--accent)">${list.length} araç · Toplam alacak: ₺${toplam.toLocaleString('tr-TR')}</span>`;
+  if(!list.length){
+    el.innerHTML='<div style="text-align:center;padding:48px;color:var(--muted)">📋<br>Veresiye kayıt yok</div>';
+    return;
+  }
+  el.innerHTML=list.map(v=>`
+    <div class="vc" onclick="openDetail('${v.id}')" style="border-left:3px solid var(--accent)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <span class="vc-plaka" style="font-size:20px">${v.plaka||'-'}</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent)">₺${((parseFloat(v.fiyat)||0)-(parseFloat(v.pesin)||0)).toLocaleString('tr-TR')}</span>
+      </div>
+      <div style="font-size:14px">👤 ${v.musteri||'-'} · 📞 ${v.telefon||'-'}</div>
+      ${v.marka||v.model?`<div style="font-size:13px;color:var(--muted)">${v.marka||''} ${v.model||''} ${v.yil||''}</div>`:''}
+      <div style="display:flex;gap:12px;font-size:12px;color:var(--muted);margin-top:4px;flex-wrap:wrap">
+        <span>Toplam: ₺${(parseFloat(v.fiyat)||0).toLocaleString('tr-TR')}</span>
+        <span>Peşin: ₺${(parseFloat(v.pesin)||0).toLocaleString('tr-TR')}</span>
+        <span style="color:var(--accent);font-weight:600">Kalan: ₺${((parseFloat(v.fiyat)||0)-(parseFloat(v.pesin)||0)).toLocaleString('tr-TR')}</span>
+      </div>
+      ${v.veresiyeNot?`<div style="font-size:12px;color:var(--accent);margin-top:4px">📝 ${v.veresiyeNot}</div>`:''}
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Kapatıldı: ${fmtDate(v.closedAt||v.createdAt)}</div>
+    </div>
+  `).join('');
 }
 
 // ── KULLANICI YÖNETİMİ ──
@@ -1039,7 +1603,7 @@ window.showPage=function(pid,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.bnav').forEach(b=>b.classList.remove('active'));
   document.getElementById(pid).classList.add('active');
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
 }
 
 window.viewImg=function(src){document.getElementById('ivImg').src=src;document.getElementById('imgViewer').classList.add('open');}
